@@ -1,0 +1,4 @@
+-- Applied 2026-10-07 via the Supabase connector. Web push subscriptions + save/remove RPCs.
+-- See the live definition with: select pg_get_functiondef('public.save_push'::regproc);
+-- Table public.push_subs(endpoint pk, village, p256dh, auth, role, user_id, created_at, updated_at);
+-- RLS: admins read; phones write only via save_push()/remove_push() (security definer, authenticated only).

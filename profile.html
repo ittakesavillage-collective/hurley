@@ -32,9 +32,24 @@
     <div class="btns"><button class="btn" id="save">Save</button></div>
     <p class="note" id="msg" hidden></p>
   </form>
+  <!-- Step 2 after saving: catch people for notifications while they're engaged -->
+  <section class="card" id="notify" hidden>
+    <b>Hear what's happening in Hurley?</b>
+    <p>Get a notification for village news, replies to your ideas and important notices. Not too many, promise.</p>
+    <div class="btns"><button class="btn terra" id="yes">Yes, notify me</button><button class="btn ghost" id="no">Not now</button></div>
+    <p class="note" id="nmsg" hidden></p>
+  </section>
+  <section class="card" id="notify-ios" hidden>
+    <b>Want notifications?</b>
+    <p>On iPhone, notifications work once Hurley is on your home screen. It takes three taps.</p>
+    <div class="btns"><a class="btn terra" href="install.html">Show me how</a><button class="btn ghost" id="skip">Not now</button></div>
+  </section>
   <section class="card"><dl class="facts"><dt>Village</dt><dd>Hurley</dd></dl></section>
 </main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/data.js"></script>
+<script src="js/db.js"></script>
+<script src="js/push.js"></script>
 <script>
 const $ = id => document.getElementById(id);
 const get = k => { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } };
@@ -55,9 +70,28 @@ $('form').onsubmit = e => {
   const name = $('name').value.trim();
   if (!name || !role) { $('msg').textContent = !name ? 'Please add your name.' : 'Please choose who you are in Hurley.'; $('msg').hidden = false; return; }
   put('hurley.name', name); put('hurley.role', role);
-  if (safeBack) location.href = safeBack + '#post';
-  else { $('msg').textContent = 'Saved.'; $('msg').hidden = false; }
+  // Ask about notifications once, right after the profile is complete
+  const asked = get('hurley.pushAsked');
+  if (!asked && pushNeedsInstall()) return step('notify-ios');
+  if (!asked && pushSupported() && Notification.permission === 'default') return step('notify');
+  done();
 };
+const done = () => {
+  if (safeBack) location.href = safeBack + '#post';
+  else { $('notify').hidden = $('notify-ios').hidden = true; $('form').hidden = false; $('msg').textContent = 'Saved.'; $('msg').hidden = false; }
+};
+const step = id => { $('form').hidden = true; $(id).hidden = false; $(id).scrollIntoView({ block: 'start' }); };
+$('yes').onclick = async () => {
+  $('yes').disabled = true; put('hurley.pushAsked', '1');
+  const r = await enablePush();
+  $('nmsg').textContent = r === 'on' ? 'You’re all set.'
+    : r === 'denied' ? 'No problem. You can turn them on later in Settings.'
+    : 'That didn’t work this time. You can try again in Settings.';
+  $('nmsg').hidden = false;
+  setTimeout(done, r === 'on' ? 900 : 1800);
+};
+$('no').onclick = () => { put('hurley.pushAsked', '1'); done(); };
+$('skip').onclick = () => { put('hurley.pushAsked', '1'); done(); };
 </script>
 </body>
 </html>

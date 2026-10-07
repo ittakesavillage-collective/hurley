@@ -43,6 +43,7 @@
       <button data-t="posts">Messages waiting<span class="n" id="n-posts"></span></button>
       <button data-t="all">All ideas</button>
       <button data-t="live">Live messages</button>
+      <button data-t="notify">Notify</button>
     </div>
   </div>
   <section class="card" id="list" hidden></section>
@@ -115,12 +116,66 @@ async function showNotes() {
   };
 }
 
+// Push notifications: send to everyone (or one role); the server function checks you're an admin
+async function push(payload) {
+  const { data, error } = await sb.functions.invoke('send-push', { body: { village: VILLAGE, ...payload } });
+  if (error) {
+    let m = error.message;
+    try { m = (await error.context.json()).error || m; } catch (e) {}
+    throw new Error(m);
+  }
+  return data;
+}
+const PAGES = [['./', 'Home']].concat(PLACES.map(p => ['place.html?p=' + p.id, p.name]));
+async function showNotify() {
+  const { data: subs } = await sb.from('push_subs').select('role').eq('village', VILLAGE);
+  const n = r => (subs || []).filter(s => !r || s.role === r).length;
+  $('list').innerHTML = '<form id="pform" class="adm"><b>Send a notification</b>'
+    + '<p class="note">' + n() + ' phone' + (n() === 1 ? '' : 's') + ' signed up for notifications.</p>'
+    + '<label class="f">Title<input type="text" id="ptitle" maxlength="80" required placeholder="e.g. Road closed tomorrow"></label>'
+    + '<label class="f">Message<textarea id="pbody" maxlength="240" rows="3" placeholder="A line or two"></textarea></label>'
+    + '<label class="f">Who to send to<select id="prole"><option value="">Everyone (' + n() + ')</option>'
+    +   ROLES.map(r => '<option value="' + esc(r) + '">' + esc(r) + ' (' + n(r) + ')</option>').join('') + '</select></label>'
+    + '<label class="f">Opens<select id="purl">' + PAGES.map(([u, t]) => '<option value="' + u + '">' + esc(t) + '</option>').join('') + '</select></label>'
+    + '<div class="btns"><button class="btn terra" id="psend">Send</button></div></form>';
+  $('pform').onsubmit = async e => {
+    e.preventDefault();
+    const who = $('prole').value || 'everyone';
+    if (!confirm('Send this to ' + who + '?')) return;
+    $('psend').disabled = true;
+    try {
+      const r = await push({ title: $('ptitle').value.trim(), body: $('pbody').value.trim(), role: $('prole').value || undefined, url: $('purl').value });
+      say('Sent to ' + r.sent + ' of ' + r.total + ' phones.' + (r.gone ? ' ' + r.gone + ' had switched notifications off and were removed.' : '') + (r.failed ? ' ' + r.failed + ' failed.' : ''));
+      $('pform').reset();
+    } catch (err) { say('Not sent: ' + err.message); }
+    $('psend').disabled = false;
+  };
+}
+
+// Tell the person who suggested/posted something when it moves forward (never on reject/take-down)
+async function tellAuthor(table, id, a, value) {
+  const msgs = {
+    approve: ['Your idea is on the list', 'Hurley can now vote on it.', 'place.html?p=yourway'],
+    status: value === 'planned' ? ['Your idea is planned', 'It’s going to be built.', 'place.html?p=yourway']
+          : value === 'building' ? ['Your idea is being built', '', 'place.html?p=yourway']
+          : value === 'done' ? ['Your idea is done!', 'Open Hurley to see it.', 'place.html?p=yourway'] : null,
+    reply: ['We replied to your idea', '', 'place.html?p=yourway'],
+    publish: ['Your message is live', 'It’s now on the Hurley Message Board.', 'place.html?p=board']
+  };
+  const m = msgs[a];
+  if (!m || (table !== 'requests' && table !== 'posts')) return;
+  const { data } = await sb.from(table).select('created_by,title').eq('id', id).single();
+  if (!data) return;
+  try { await push({ user_id: data.created_by, title: m[0], body: m[1] || data.title, url: m[2] }); } catch (e) {}
+}
+
 async function show(t) {
   tab = t;
   document.querySelectorAll('#tabs button').forEach(b => b.setAttribute('aria-pressed', b.dataset.t === t));
   $('list').innerHTML = '<p class="note">Loading…</p>';
   counts();
   if (t === 'notes') return showNotes();
+  if (t === 'notify') return showNotify();
   const ideas = t === 'ideas' || t === 'all';
   let q = ideas ? sb.from('request_list').select('*') : sb.from('posts').select('*');
   q = q.eq('village', VILLAGE).order('created_at', { ascending: false });
@@ -162,6 +217,7 @@ async function act(row, a, value) {
   else if (a === 'delete') { if (!confirm('Delete this idea and its votes for good?')) return; r = await sb.from(table).delete().eq('id', id); }
   if (r.error) return say('Didn’t save: ' + r.error.message);
   say(a === 'reply' ? 'Reply saved.' : '');
+  tellAuthor(table, id, a, value);
   if (a !== 'reply') show(tab);
 }
 $('list').onclick = e => { const b = e.target.closest('button[data-a]'); if (b) act(b.closest('.adm'), b.dataset.a); };
