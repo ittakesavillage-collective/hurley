@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F9F6F0">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/favicon-32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="css/app.css">
+<script src="js/theme.js"></script>
+<title>Profile · Hurley</title>
+</head>
+<body>
+<header class="bar"><div class="bar-in">
+  <a class="back" href="./">&larr; Home</a>
+  <h1>Profile</h1>
+</div></header>
+<main class="wrap">
+  <section class="card">
+    <label class="f">Your name<input type="text" id="name" autocomplete="given-name" placeholder="e.g. Sam"></label>
+    <p class="note">Used later when you post on the message board. For now it stays on this phone.</p>
+  </section>
+  <section class="card"><dl class="facts"><dt>Village</dt><dd>Hurley</dd></dl></section>
+  <p class="note">Sign-in, favourites and notifications will live here.</p>
+</main>
+<script>
+const n = document.getElementById('name');
+try { n.value = localStorage.getItem('hurley.name') || ''; } catch (e) {}
+n.oninput = () => { try { localStorage.setItem('hurley.name', n.value.trim()); } catch (e) {} };
+</script>
+</body>
+</html>

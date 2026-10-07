@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F9F6F0">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="css/app.css">
+<script src="js/theme.js"></script>
+<title>Hurley</title>
+</head>
+<body>
+<header class="bar"><div class="bar-in">
+  <a class="back" href="./">&larr; Home</a>
+  <h1 id="title"></h1>
+</div></header>
+<main class="wrap" id="main"></main>
+
+<script src="js/data.js"></script>
+<script>
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+// Placeholder text (starts with xxx) shows greyed out
+const val = s => /^xxx/i.test(s) ? '<span class="ph">' + esc(s) + '</span>' : esc(s);
+const p = PLACES.find(x => x.id === new URLSearchParams(location.search).get('p')) || PLACES[0];
+document.title = p.name + ' · Hurley';
+document.getElementById('title').textContent = p.name;
+const hero = sub => '<div class="hero"><div class="ic">' + svg(p.id) + '</div><div><h2>' + esc(p.name) + '</h2>'
+  + (sub ? '<p class="muted">' + esc(sub) + '</p>' : '') + '</div></div>';
+let h = '';
+if (p.type === 'venue') {
+  const tel = /^[0-9 +]+$/.test(p.phone) ? p.phone.replace(/\s/g, '') : '';
+  h = hero(p.kind)
+    + '<section class="card"><p>' + val(p.about) + '</p></section>'
+    + '<section class="card"><dl class="facts"><dt>Opening hours</dt><dd>' + val(p.hours) + '</dd><dt>Phone</dt><dd>' + val(p.phone) + '</dd></dl></section>'
+    + '<div class="btns">'
+    +   '<a class="btn" ' + (tel ? 'href="tel:' + tel + '"' : 'aria-disabled="true"') + '>Call</a>'
+    +   '<a class="btn ghost" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(p.map) + '">Map</a>'
+    +   (p.web ? '<a class="btn ghost" target="_blank" rel="noopener" href="' + esc(p.web) + '">Website</a>' : '')
+    + '</div>';
+} else if (p.type === 'list') {
+  h = hero(p.intro) + '<section class="card">' + p.items.map(i =>
+      '<div class="item"><b>' + val(i.t) + '</b>' + (i.d ? '<small>' + val(i.d) + '</small>' : '') + '<span>' + val(i.b) + '</span></div>').join('') + '</section>'
+    + (p.soon ? '<p class="note">' + esc(p.soon) + '</p>' : '');
+} else {
+  // Your App, your way. Now: email an idea. Later: the moderated request list with thumbs up/down.
+  const mail = 'mailto:broadfords@gmail.com?subject=' + encodeURIComponent('Idea for Hurley') + '&body=' + encodeURIComponent('My idea for Hurley is: ');
+  h = hero('Help shape what Hurley’s app does next.')
+    + '<section class="card"><p>Suggest a tweak or a whole new feature, vote on other people’s ideas, and we build what Hurley asks for.</p>'
+    + '<span class="badge">Voting coming soon</span></section>'
+    + '<section class="card"><b>On the list</b>'
+    +   '<div class="item"><span class="ph">xxx idea</span><small>Suggested</small></div>'
+    +   '<div class="item"><span class="ph">xxx idea</span><small>Planned</small></div></section>'
+    + '<div class="btns"><a class="btn terra" href="' + mail + '">Send us an idea</a></div>'
+    + '<p class="note">Opens a new email to us from your phone. Just add your idea and press Send.</p>';
+}
+document.getElementById('main').innerHTML = h;
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+</script>
+</body>
+</html>
