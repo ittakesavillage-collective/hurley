@@ -54,6 +54,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/data.js"></script>
 <script src="js/db.js"></script>
+<script src="js/push.js"></script>
 <script>
 const $ = id => document.getElementById(id);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -64,6 +65,7 @@ let tab = 'notes';
 async function start() {
   if (await isAdmin()) {
     flag(true);
+    claimPush();
     $('login').hidden = true; $('panel').hidden = false; $('list').hidden = false; $('out').hidden = false;
     show(tab);
   } else {
@@ -82,6 +84,16 @@ $('login').onsubmit = async e => {
 };
 $('signout').onclick = async () => { await sb.auth.signOut(); flag(false); location.href = './'; };
 $('tabs').onclick = e => { const b = e.target.closest('button'); if (b) show(b.dataset.t); };
+
+// If this phone already gets notifications, link them to the admin account so admin alerts arrive here
+async function claimPush() {
+  try {
+    const sub = await currentSub();
+    if (!sub || Notification.permission !== 'granted') return;
+    const j = sub.toJSON();
+    await sb.rpc('save_push', { p_village: VILLAGE, p_endpoint: j.endpoint, p_p256dh: j.keys.p256dh, p_auth: j.keys.auth, p_role: profile().role || null });
+  } catch (e) {}
+}
 
 async function counts() {
   const [a, b] = await Promise.all([

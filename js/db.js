@@ -30,6 +30,20 @@ function profile() {
 }
 const profileOk = () => { const p = profile(); return !!(p.name && p.role); };
 
+// Copy the on-phone profile to the database (first save also alerts the admin: "New Hurley user").
+// Best-effort and in the background: never holds the villager up.
+async function syncProfile(force) {
+  const p = profile();
+  if (!sb || !p.name || !p.role) return;
+  const stamp = p.name + '|' + p.role;
+  try { if (!force && localStorage.getItem('hurley.profileSynced') === stamp) return; } catch (e) {}
+  try {
+    const me = await ensureUser();
+    const { error } = await sb.from('profiles').upsert({ user_id: me.id, village: VILLAGE, name: p.name, role: p.role, updated_at: new Date().toISOString() });
+    if (!error) try { localStorage.setItem('hurley.profileSynced', stamp); } catch (e) {}
+  } catch (e) {}
+}
+
 const STATUS = { pending: 'Waiting for approval', suggested: 'Suggested', planned: 'Planned', building: 'Being built', done: 'Done', rejected: 'Not going ahead', live: 'Live', removed: 'Removed' };
 const ago = t => {
   const s = (Date.now() - new Date(t)) / 1000;

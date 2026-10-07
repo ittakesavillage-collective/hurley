@@ -70,6 +70,7 @@ $('form').onsubmit = e => {
   const name = $('name').value.trim();
   if (!name || !role) { $('msg').textContent = !name ? 'Please add your name.' : 'Please choose who you are in Hurley.'; $('msg').hidden = false; return; }
   put('hurley.name', name); put('hurley.role', role);
+  syncProfile();
   // Ask about notifications once, right after the profile is complete
   const asked = get('hurley.pushAsked');
   if (!asked && pushNeedsInstall()) return step('notify-ios');

@@ -170,6 +170,7 @@ if (p.type === 'venue') {
   load();
   if (location.hash === '#post') { history.replaceState(null, '', location.pathname + location.search); openForm('ftitle'); }
 }
+if (p.type === 'board' || p.type === 'yourway') syncProfile();
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
 </script>
 </body>

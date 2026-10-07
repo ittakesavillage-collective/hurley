@@ -1,0 +1,5 @@
+-- Applied 2026-10-07 via the Supabase connector.
+-- pg_net; public.profiles (user_id pk, village, name, role, alerted_at; own-row RLS, admin reads);
+-- alerted_at on posts/requests; trigger function public.alert_admins() -> net.http_post to the
+-- send-push function with {alert: <table>, key}; triggers alert_new_post / alert_new_idea / alert_new_profile.
+-- Admin's own inserts never alert. The function claims each row once (alerted_at) within 10 minutes.

@@ -1,5 +1,6 @@
-// send-push: admin-only. Sends a web push to everyone in a village (optionally one role) or to one user.
-// Body: { village, title, body, url?, role?, user_id? }
+// send-push. Two jobs:
+//  1. Admin sends (signed-in admin only): { village, title, body, url?, role?, user_id? }
+//  2. Admin alerts from DB triggers (new message / idea / profile): { alert, key } -> admin phones only
 // Secret needed (Supabase > Edge Functions > Secrets): VAPID_PRIVATE_KEY
 import { createClient } from "npm:@supabase/supabase-js@2";
 import webpush from "npm:web-push@3.6.7";
@@ -26,16 +27,22 @@ Deno.serve(async (req) => {
   const priv = Deno.env.get("VAPID_PRIVATE_KEY");
   if (!priv) return json({ error: "VAPID_PRIVATE_KEY secret is not set" }, 500);
 
-  // Who is calling? Must be signed in and listed in public.admins.
   const url = Deno.env.get("SUPABASE_URL")!;
-  const token = (req.headers.get("Authorization") ?? "").replace(/^Bearer\s+/i, "");
   const admin = createClient(url, serviceKey(), { auth: { persistSession: false } });
+  webpush.setVapidDetails("mailto:broadfords@gmail.com", VAPID_PUBLIC, priv);
+  const b = await req.json().catch(() => ({}));
+
+  // Admin alerts, fired by database triggers: { alert: 'posts'|'requests'|'profiles', key }.
+  // No sign-in needed: we look the row up ourselves and alert at most once per row, so it can't be abused.
+  if (b.alert) return json(await adminAlert(admin, String(b.alert), String(b.key ?? "")));
+
+  // Who is calling? Must be signed in and listed in public.admins.
+  const token = (req.headers.get("Authorization") ?? "").replace(/^Bearer\s+/i, "");
   const { data: u, error: uerr } = await admin.auth.getUser(token);
   if (uerr || !u?.user) return json({ error: "Not signed in" }, 401);
   const { data: isAdm } = await admin.from("admins").select("user_id").eq("user_id", u.user.id).maybeSingle();
   if (!isAdm) return json({ error: "Admins only" }, 403);
 
-  const b = await req.json().catch(() => ({}));
   const title = String(b.title ?? "").slice(0, 80).trim();
   const body = String(b.body ?? "").slice(0, 240).trim();
   if (!b.village || !title) return json({ error: "village and title are required" }, 400);
@@ -46,10 +53,15 @@ Deno.serve(async (req) => {
   const { data: subs, error } = await q;
   if (error) return json({ error: error.message }, 500);
 
-  webpush.setVapidDetails("mailto:broadfords@gmail.com", VAPID_PUBLIC, priv);
-  const payload = JSON.stringify({ title, body, url: String(b.url ?? "./") });
+  return json(await sendAll(admin, subs ?? [], { title, body, url: String(b.url ?? "./") }));
+});
+
+type Sub = { endpoint: string; p256dh: string; auth: string };
+// deno-lint-ignore no-explicit-any
+async function sendAll(admin: any, subs: Sub[], msg: { title: string; body: string; url: string }) {
+  const payload = JSON.stringify(msg);
   let sent = 0, gone = 0, failed = 0;
-  await Promise.all((subs ?? []).map(async (s) => {
+  await Promise.all(subs.map(async (s) => {
     try {
       await webpush.sendNotification({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, payload, { TTL: 86400 });
       sent++;
@@ -59,5 +71,27 @@ Deno.serve(async (req) => {
       else failed++;
     }
   }));
-  return json({ sent, gone, failed, total: subs?.length ?? 0 });
-});
+  return { sent, gone, failed, total: subs.length };
+}
+
+// deno-lint-ignore no-explicit-any
+async function adminAlert(admin: any, table: string, key: string) {
+  const keyCol = table === "profiles" ? "user_id" : "id";
+  if (!["posts", "requests", "profiles"].includes(table) || !key) return { skipped: "bad alert" };
+  // Claim the row: only the first call within 10 minutes of creation wins
+  const since = new Date(Date.now() - 10 * 60 * 1000).toISOString();
+  const { data: row } = await admin.from(table).update({ alerted_at: new Date().toISOString() })
+    .eq(keyCol, key).is("alerted_at", null).gte("created_at", since).select("*").maybeSingle();
+  if (!row) return { skipped: "already alerted or not found" };
+
+  const who = `${row.name} (${row.role})`;
+  const msg = table === "posts" ? { title: "New message to approve", body: `${row.title} · ${who}`, url: "admin.html" }
+    : table === "requests" ? { title: "New idea to approve", body: `${row.title} · ${who}`, url: "admin.html" }
+    : { title: "New Hurley user", body: who, url: "admin.html" };
+
+  const { data: admins } = await admin.from("admins").select("user_id");
+  const ids = (admins ?? []).map((a: { user_id: string }) => a.user_id);
+  if (!ids.length) return { skipped: "no admins" };
+  const { data: subs } = await admin.from("push_subs").select("endpoint,p256dh,auth").eq("village", row.village).in("user_id", ids);
+  return await sendAll(admin, subs ?? [], msg);
+}
