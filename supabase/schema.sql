@@ -115,7 +115,9 @@ grant usage on schema public to anon, authenticated;
 grant select on public.admins to authenticated;
 grant select, insert, update, delete on public.requests, public.votes, public.posts to authenticated;
 grant select on public.request_list to authenticated;
-grant execute on function public.is_admin() to anon, authenticated;
+revoke execute on function public.limit_pending() from public, anon, authenticated;
+revoke execute on function public.is_admin() from public, anon;
+grant execute on function public.is_admin() to authenticated;
 create table if not exists public.dev_notes (
   id          bigint generated always as identity primary key,
   village     text not null check (village in ('hurley','willian')),
