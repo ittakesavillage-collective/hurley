@@ -45,6 +45,8 @@ function seg(id, key, cur, apply) {
 seg('theme', 'hurley.theme', get('hurley.theme') || 'auto', v => { if (v === 'auto') delete root.dataset.theme; else root.dataset.theme = v; });
 seg('size', 'hurley.size', get('hurley.size') || 'normal', v => { if (v === 'large') root.dataset.size = 'large'; else delete root.dataset.size; });
 document.getElementById('ver').textContent = 'v' + VERSION;
+// Admin door: tap the version number 5 times
+let taps = 0; document.getElementById('ver').onclick = () => { if (++taps >= 5) location.href = 'admin.html'; };
 document.getElementById('upd').onclick = async () => {
   try { const r = await navigator.serviceWorker.getRegistration(); if (r) await r.update(); } catch (e) {}
   location.reload();

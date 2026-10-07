@@ -82,8 +82,23 @@ dl.facts dd{margin:0;font-weight:500}
 
 /* Forms */
 label.f{display:flex;flex-direction:column;gap:6px;font-weight:600}
-input[type=text]{min-height:48px;padding:10px 14px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);font-weight:400}
+input[type=text],input[type=email],input[type=password],textarea{min-height:48px;padding:10px 14px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);font-weight:400}
 .seg{display:flex;background:var(--sage-soft);border-radius:12px;padding:4px;gap:4px}
 .seg button{flex:1;min-height:42px;border:0;border-radius:9px;background:none;color:var(--ink);font-weight:500;cursor:pointer}
 .seg button[aria-pressed="true"]{background:var(--surface);font-weight:700;box-shadow:0 1px 3px rgb(0 0 0 / .12)}
 .row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+textarea{resize:vertical;min-height:96px}
+
+/* Requests & votes */
+.req{gap:6px}
+.req .row b{flex:1}
+.chip{flex:none;font-size:12px;font-weight:600;padding:3px 10px;border-radius:999px;background:var(--sage-soft);color:var(--ink)}
+.chip.s-pending{background:var(--gold);color:var(--on-gold)}
+.chip.s-planned{background:var(--sage);color:var(--on-sage)}
+.chip.s-building{background:var(--terra);color:var(--on-terra)}
+.chip.s-done{background:var(--ink);color:var(--cream)}
+.reply{font-size:.92em;padding:8px 12px;border-left:3px solid var(--sage);background:var(--sage-soft);border-radius:0 10px 10px 0}
+.votes{display:flex;gap:8px;margin-top:4px}
+.vote{min-height:40px;min-width:64px;padding:6px 12px;border-radius:999px;border:1.5px solid var(--line);background:none;color:var(--ink);font-weight:600;cursor:pointer}
+.vote.on{border-color:var(--sage);background:var(--sage-soft)}
+.vote:disabled{opacity:.6}

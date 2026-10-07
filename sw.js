@@ -1,7 +1,7 @@
 // Network-first: always fetch the latest when online (updates are automatic); fall back to cache offline.
-const CACHE = 'hurley-v0.1.0';
-const SHELL = ['./', 'index.html', 'place.html', 'profile.html', 'settings.html', 'about.html', 'install.html',
-  'css/app.css', 'js/theme.js', 'js/data.js', 'icons/mark.png', 'icons/icon-192.png', 'assets/collective-logo.webp'];
+const CACHE = 'hurley-v0.2.0';
+const SHELL = ['./', 'index.html', 'place.html', 'profile.html', 'settings.html', 'about.html', 'install.html', 'admin.html',
+  'css/app.css', 'js/theme.js', 'js/data.js', 'js/db.js', 'icons/mark.png', 'icons/icon-192.png', 'assets/collective-logo.webp'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));

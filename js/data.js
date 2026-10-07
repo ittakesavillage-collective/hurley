@@ -1,5 +1,5 @@
 // Hurley app content. Placeholders (xxx) are filled in as real details arrive.
-const VERSION = '0.1.0';
+const VERSION = '0.2.0';
 
 // 24px line icons, drawn with currentColor
 const ICONS = {
@@ -22,10 +22,7 @@ const PLACES = [
     items:[{t:'xxx headline', d:'xxx date', b:'xxx summary of the story.'},
            {t:'xxx headline', d:'xxx date', b:'xxx summary of the story.'},
            {t:'xxx headline', d:'xxx date', b:'xxx summary of the story.'}]},
-  {id:'board', name:'Message Board', type:'list', intro:'Notices, lost & found, offers of help and things for sale.',
-    soon:'Posting your own messages is coming soon.',
-    items:[{t:'xxx notice', d:'xxx name \u00b7 xxx date', b:'xxx message.'},
-           {t:'xxx notice', d:'xxx name \u00b7 xxx date', b:'xxx message.'}]},
+  {id:'board', name:'Message Board', type:'board', intro:'Notices, lost & found, offers of help and things for sale.'},
   {id:'oldebell', name:'Olde Bell', type:'venue', kind:'Hotel, restaurant & bar',
     about:'xxx short description of the Olde Bell.', hours:'xxx', phone:'xxx', web:'', map:'Ye Olde Bell, Hurley'},
   {id:'risingsun', name:'Rising Sun', type:'venue', kind:'Pub',

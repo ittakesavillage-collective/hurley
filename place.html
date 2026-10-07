@@ -21,20 +21,26 @@
 </div></header>
 <main class="wrap" id="main"></main>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/data.js"></script>
+<script src="js/db.js"></script>
 <script>
-const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 // Placeholder text (starts with xxx) shows greyed out
 const val = s => /^xxx/i.test(s) ? '<span class="ph">' + esc(s) + '</span>' : esc(s);
+const $ = id => document.getElementById(id);
 const p = PLACES.find(x => x.id === new URLSearchParams(location.search).get('p')) || PLACES[0];
 document.title = p.name + ' · Hurley';
-document.getElementById('title').textContent = p.name;
+$('title').textContent = p.name;
 const hero = sub => '<div class="hero"><div class="ic">' + svg(p.id) + '</div><div><h2>' + esc(p.name) + '</h2>'
   + (sub ? '<p class="muted">' + esc(sub) + '</p>' : '') + '</div></div>';
-let h = '';
+const myName = () => { try { return localStorage.getItem('hurley.name') || ''; } catch (e) { return ''; } };
+const OOPS = '<p class="note">Couldn’t reach Hurley’s noticeboard. Check your signal and try again.</p>';
+const errText = e => /Too many/.test(e && e.message) ? 'You already have 5 things waiting for approval. Please wait for those to be checked.' : 'Sorry, that didn’t send. Check your signal and try again.';
+
 if (p.type === 'venue') {
   const tel = /^[0-9 +]+$/.test(p.phone) ? p.phone.replace(/\s/g, '') : '';
-  h = hero(p.kind)
+  $('main').innerHTML = hero(p.kind)
     + '<section class="card"><p>' + val(p.about) + '</p></section>'
     + '<section class="card"><dl class="facts"><dt>Opening hours</dt><dd>' + val(p.hours) + '</dd><dt>Phone</dt><dd>' + val(p.phone) + '</dd></dl></section>'
     + '<div class="btns">'
@@ -42,23 +48,116 @@ if (p.type === 'venue') {
     +   '<a class="btn ghost" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(p.map) + '">Map</a>'
     +   (p.web ? '<a class="btn ghost" target="_blank" rel="noopener" href="' + esc(p.web) + '">Website</a>' : '')
     + '</div>';
+
 } else if (p.type === 'list') {
-  h = hero(p.intro) + '<section class="card">' + p.items.map(i =>
-      '<div class="item"><b>' + val(i.t) + '</b>' + (i.d ? '<small>' + val(i.d) + '</small>' : '') + '<span>' + val(i.b) + '</span></div>').join('') + '</section>'
-    + (p.soon ? '<p class="note">' + esc(p.soon) + '</p>' : '');
+  $('main').innerHTML = hero(p.intro) + '<section class="card">' + p.items.map(i =>
+      '<div class="item"><b>' + val(i.t) + '</b>' + (i.d ? '<small>' + val(i.d) + '</small>' : '') + '<span>' + val(i.b) + '</span></div>').join('') + '</section>';
+
+} else if (p.type === 'board') {
+  // Message board: live posts; new posts wait for approval before everyone sees them
+  $('main').innerHTML = hero(p.intro)
+    + '<div class="btns"><button class="btn terra" id="new">Post a message</button></div>'
+    + '<form class="card" id="form" hidden>'
+    +   '<label class="f">Your name<input type="text" id="fname" maxlength="40" required></label>'
+    +   '<label class="f">Subject<input type="text" id="ftitle" maxlength="120" minlength="3" required></label>'
+    +   '<label class="f">Message<textarea id="fbody" maxlength="1000" rows="4" required></textarea></label>'
+    +   '<p class="note">Messages are checked before they appear, usually within a day.</p>'
+    +   '<div class="btns"><button class="btn" id="send">Send</button><button type="button" class="btn ghost" id="cancel">Cancel</button></div>'
+    + '</form>'
+    + '<p class="note" id="msg" hidden></p>'
+    + '<section class="card" id="list"><p class="note">Loading…</p></section>';
+  const load = async () => {
+    try {
+      const me = await ensureUser();
+      const { data, error } = await sb.from('posts').select('*').eq('village', VILLAGE).neq('status', 'removed').order('created_at', { ascending: false }).limit(100);
+      if (error) throw error;
+      $('list').innerHTML = data.length ? data.map(r =>
+        '<div class="item"><b>' + esc(r.title) + '</b><small>' + esc(r.name) + ' · ' + ago(r.created_at)
+        + (r.status === 'pending' ? ' · <span class="badge">Waiting for approval</span>' : '') + '</small><span>' + esc(r.body) + '</span></div>').join('')
+        : '<p class="note">No messages yet. Be the first!</p>';
+    } catch (e) { $('list').innerHTML = OOPS; }
+  };
+  $('new').onclick = () => { $('form').hidden = false; $('new').hidden = true; $('msg').hidden = true; $('fname').value = myName(); ($('fname').value ? $('ftitle') : $('fname')).focus(); };
+  $('cancel').onclick = () => { $('form').hidden = true; $('new').hidden = false; };
+  $('form').onsubmit = async e => {
+    e.preventDefault(); $('send').disabled = true;
+    try {
+      await ensureUser();
+      const name = $('fname').value.trim();
+      try { localStorage.setItem('hurley.name', name); } catch (err) {}
+      const { error } = await sb.from('posts').insert({ village: VILLAGE, name, title: $('ftitle').value.trim(), body: $('fbody').value.trim() });
+      if (error) throw error;
+      $('form').reset(); $('form').hidden = true; $('new').hidden = false;
+      $('msg').textContent = 'Thanks! Your message will appear once it’s been checked.'; $('msg').hidden = false;
+      load();
+    } catch (err) { $('msg').textContent = errText(err); $('msg').hidden = false; }
+    $('send').disabled = false;
+  };
+  load();
+
 } else {
-  // Your App, your way. Now: email an idea. Later: the moderated request list with thumbs up/down.
-  const mail = 'mailto:broadfords@gmail.com?subject=' + encodeURIComponent('Idea for Hurley') + '&body=' + encodeURIComponent('My idea for Hurley is: ');
-  h = hero('Help shape what Hurley’s app does next.')
-    + '<section class="card"><p>Suggest a tweak or a whole new feature, vote on other people’s ideas, and we build what Hurley asks for.</p>'
-    + '<span class="badge">Voting coming soon</span></section>'
-    + '<section class="card"><b>On the list</b>'
-    +   '<div class="item"><span class="ph">xxx idea</span><small>Suggested</small></div>'
-    +   '<div class="item"><span class="ph">xxx idea</span><small>Planned</small></div></section>'
-    + '<div class="btns"><a class="btn terra" href="' + mail + '">Send us an idea</a></div>'
-    + '<p class="note">Opens a new email to us from your phone. Just add your idea and press Send.</p>';
+  // Your App, your way: approved requests, thumbs up/down (one vote per phone), suggest a new one
+  $('main').innerHTML = hero('Help shape what Hurley’s app does next.')
+    + '<section class="card"><p>Suggest a tweak or a whole new feature, give other people’s ideas a thumbs up or down, and we build what Hurley asks for.</p></section>'
+    + '<div class="btns"><button class="btn terra" id="new">Suggest an idea</button></div>'
+    + '<form class="card" id="form" hidden>'
+    +   '<label class="f">Your idea<input type="text" id="ftitle" maxlength="120" minlength="3" required placeholder="e.g. Bus times on the home screen"></label>'
+    +   '<label class="f">More detail (optional)<textarea id="fbody" maxlength="1000" rows="3"></textarea></label>'
+    +   '<p class="note">Ideas are checked before they go on the list, usually within a day.</p>'
+    +   '<div class="btns"><button class="btn" id="send">Send</button><button type="button" class="btn ghost" id="cancel">Cancel</button></div>'
+    + '</form>'
+    + '<p class="note" id="msg" hidden></p>'
+    + '<section class="card" id="list"><p class="note">Loading…</p></section>';
+  let me = null, mine = {};
+  const ORDER = { pending: 0, building: 1, planned: 2, suggested: 3, done: 4 };
+  const thumb = (dir, n, on, id) => '<button class="vote' + (on ? ' on' : '') + '" data-id="' + id + '" data-v="' + dir + '" aria-pressed="' + on + '" aria-label="Thumbs ' + (dir > 0 ? 'up' : 'down') + '">'
+    + (dir > 0 ? '👍' : '👎') + ' <span>' + n + '</span></button>';
+  const load = async () => {
+    try {
+      me = await ensureUser();
+      const [{ data, error }, { data: mv }] = await Promise.all([
+        sb.from('request_list').select('*').eq('village', VILLAGE).neq('status', 'rejected'),
+        sb.from('votes').select('request_id,value').eq('user_id', me.id)
+      ]);
+      if (error) throw error;
+      mine = {}; (mv || []).forEach(v => mine[v.request_id] = v.value);
+      data.sort((a, b) => (ORDER[a.status] - ORDER[b.status]) || ((b.ups - b.downs) - (a.ups - a.downs)) || (new Date(b.created_at) - new Date(a.created_at)));
+      $('list').innerHTML = '<b>On the list</b>' + (data.length ? data.map(r =>
+        '<div class="item req"><div class="row"><b>' + esc(r.title) + '</b><span class="chip s-' + r.status + '">' + STATUS[r.status] + '</span></div>'
+        + (r.body ? '<span>' + esc(r.body) + '</span>' : '')
+        + (r.reply ? '<span class="reply"><b>From the collective:</b> ' + esc(r.reply) + '</span>' : '')
+        + (r.status === 'pending' ? '' : '<div class="votes">' + thumb(1, r.ups, mine[r.id] === 1, r.id) + thumb(-1, r.downs, mine[r.id] === -1, r.id) + '</div>')
+        + '</div>').join('') : '<p class="note">Nothing on the list yet. Suggest the first idea!</p>');
+    } catch (e) { $('list').innerHTML = OOPS; }
+  };
+  $('list').onclick = async e => {
+    const b = e.target.closest('.vote'); if (!b) return;
+    const id = +b.dataset.id, v = +b.dataset.v;
+    b.disabled = true;
+    try {
+      // Tap the same thumb again to take your vote back
+      const r = mine[id] === v ? await sb.from('votes').delete().eq('request_id', id).eq('user_id', me.id)
+                               : await sb.from('votes').upsert({ request_id: id, user_id: me.id, value: v });
+      if (r.error) throw r.error;
+    } catch (err) { $('msg').textContent = errText(err); $('msg').hidden = false; }
+    load();
+  };
+  $('new').onclick = () => { $('form').hidden = false; $('new').hidden = true; $('msg').hidden = true; $('ftitle').focus(); };
+  $('cancel').onclick = () => { $('form').hidden = true; $('new').hidden = false; };
+  $('form').onsubmit = async e => {
+    e.preventDefault(); $('send').disabled = true;
+    try {
+      await ensureUser();
+      const { error } = await sb.from('requests').insert({ village: VILLAGE, title: $('ftitle').value.trim(), body: $('fbody').value.trim() || null });
+      if (error) throw error;
+      $('form').reset(); $('form').hidden = true; $('new').hidden = false;
+      $('msg').textContent = 'Thanks! Your idea will go on the list once it’s been checked.'; $('msg').hidden = false;
+      load();
+    } catch (err) { $('msg').textContent = errText(err); $('msg').hidden = false; }
+    $('send').disabled = false;
+  };
+  load();
 }
-document.getElementById('main').innerHTML = h;
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
 </script>
 </body>

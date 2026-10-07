@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F9F6F0">
+<meta name="robots" content="noindex">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/favicon-32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="css/app.css">
+<script src="js/theme.js"></script>
+<title>Admin · Hurley</title>
+<style>
+.tabs{display:flex;gap:6px;overflow-x:auto}
+.tabs button{flex:none;min-height:40px;padding:6px 14px;border-radius:999px;border:1.5px solid var(--line);background:none;color:var(--ink);font-weight:600;cursor:pointer}
+.tabs button[aria-pressed="true"]{background:var(--ink);color:var(--cream);border-color:var(--ink)}
+.tabs .n{display:inline-block;min-width:20px;margin-left:4px;padding:0 6px;border-radius:999px;background:var(--gold);color:var(--on-gold);font-size:12px}
+.adm{display:flex;flex-direction:column;gap:8px}
+.adm select{min-height:40px;border-radius:10px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);font:inherit;padding:0 8px}
+.adm .btn{min-height:40px;padding:6px 14px}
+.btn.danger{background:none;color:var(--terra-ink);border:1.5px solid var(--terra)}
+</style>
+</head>
+<body>
+<header class="bar"><div class="bar-in">
+  <a class="back" href="./">&larr; Home</a>
+  <h1>Admin</h1>
+</div></header>
+<main class="wrap">
+  <form class="card" id="login" hidden>
+    <b>Admin sign-in</b>
+    <label class="f">Email<input type="email" id="email" autocomplete="username" required></label>
+    <label class="f">Password<input type="password" id="pw" autocomplete="current-password" required></label>
+    <div class="btns"><button class="btn">Sign in</button></div>
+  </form>
+  <div id="panel" hidden>
+    <div class="tabs" id="tabs">
+      <button data-t="ideas">Ideas waiting<span class="n" id="n-ideas"></span></button>
+      <button data-t="posts">Messages waiting<span class="n" id="n-posts"></span></button>
+      <button data-t="all">All ideas</button>
+      <button data-t="live">Live messages</button>
+    </div>
+  </div>
+  <section class="card" id="list" hidden></section>
+  <p class="note" id="msg" hidden></p>
+  <div class="btns" id="out" hidden><button class="btn ghost" id="signout">Sign out</button></div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/data.js"></script>
+<script src="js/db.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const say = t => { $('msg').textContent = t; $('msg').hidden = !t; };
+const flag = on => { try { on ? localStorage.setItem('hurley.admin', '1') : localStorage.removeItem('hurley.admin'); } catch (e) {} };
+let tab = 'ideas';
+
+async function start() {
+  if (await isAdmin()) {
+    flag(true);
+    $('login').hidden = true; $('panel').hidden = false; $('list').hidden = false; $('out').hidden = false;
+    show(tab);
+  } else {
+    flag(false);
+    $('login').hidden = false;
+  }
+}
+
+$('login').onsubmit = async e => {
+  e.preventDefault(); say('');
+  const { error } = await sb.auth.signInWithPassword({ email: $('email').value.trim(), password: $('pw').value });
+  $('pw').value = '';
+  if (error) return say('Sign-in failed: ' + error.message);
+  if (!(await isAdmin())) { await sb.auth.signOut(); return say('That account isn’t an admin.'); }
+  start();
+};
+$('signout').onclick = async () => { await sb.auth.signOut(); flag(false); location.href = './'; };
+$('tabs').onclick = e => { const b = e.target.closest('button'); if (b) show(b.dataset.t); };
+
+async function counts() {
+  const [a, b] = await Promise.all([
+    sb.from('requests').select('id', { count: 'exact', head: true }).eq('village', VILLAGE).eq('status', 'pending'),
+    sb.from('posts').select('id', { count: 'exact', head: true }).eq('village', VILLAGE).eq('status', 'pending')
+  ]);
+  $('n-ideas').textContent = a.count || ''; $('n-posts').textContent = b.count || '';
+}
+
+async function show(t) {
+  tab = t;
+  document.querySelectorAll('#tabs button').forEach(b => b.setAttribute('aria-pressed', b.dataset.t === t));
+  $('list').innerHTML = '<p class="note">Loading…</p>';
+  counts();
+  const ideas = t === 'ideas' || t === 'all';
+  let q = ideas ? sb.from('request_list').select('*') : sb.from('posts').select('*');
+  q = q.eq('village', VILLAGE).order('created_at', { ascending: false });
+  if (t === 'ideas' || t === 'posts') q = q.eq('status', 'pending');
+  if (t === 'live') q = q.eq('status', 'live');
+  const { data, error } = await q;
+  if (error) return $('list').innerHTML = '<p class="note">Couldn’t load: ' + esc(error.message) + '</p>';
+  if (!data.length) return $('list').innerHTML = '<p class="note">Nothing here.</p>';
+  $('list').innerHTML = data.map(r => ideas ? ideaRow(r) : postRow(r)).join('');
+}
+
+const opts = cur => ['pending','suggested','planned','building','done','rejected'].map(s => '<option value="' + s + '"' + (s === cur ? ' selected' : '') + '>' + STATUS[s] + '</option>').join('');
+const ideaRow = r => '<div class="item adm" data-id="' + r.id + '"><b>' + esc(r.title) + '</b>'
+  + (r.body ? '<span>' + esc(r.body) + '</span>' : '')
+  + '<small>' + ago(r.created_at) + ' · 👍 ' + r.ups + ' · 👎 ' + r.downs + '</small>'
+  + (r.status === 'pending'
+      ? '<div class="btns"><button class="btn" data-a="approve">Approve</button><button class="btn danger" data-a="reject">Reject</button></div>'
+      : '<div class="btns"><select data-a="status">' + opts(r.status) + '</select></div>')
+  + '<textarea placeholder="Reply shown under the idea (optional)" maxlength="1000" rows="2">' + esc(r.reply) + '</textarea>'
+  + '<div class="btns"><button class="btn ghost" data-a="reply">Save reply</button><button class="btn danger" data-a="delete">Delete</button></div></div>';
+const postRow = r => '<div class="item adm" data-id="' + r.id + '"><b>' + esc(r.title) + '</b><small>' + esc(r.name) + ' · ' + ago(r.created_at) + '</small>'
+  + '<span>' + esc(r.body) + '</span><div class="btns">'
+  + (r.status === 'pending' ? '<button class="btn" data-a="publish">Approve</button><button class="btn danger" data-a="remove">Reject</button>'
+                            : '<button class="btn danger" data-a="remove">Take down</button>')
+  + '</div></div>';
+
+async function act(row, a, value) {
+  const id = +row.dataset.id, ideas = tab === 'ideas' || tab === 'all';
+  const table = ideas ? 'requests' : 'posts';
+  let r;
+  if (a === 'approve') r = await sb.from(table).update({ status: 'suggested' }).eq('id', id);
+  else if (a === 'reject') r = await sb.from(table).update({ status: 'rejected' }).eq('id', id);
+  else if (a === 'status') r = await sb.from(table).update({ status: value }).eq('id', id);
+  else if (a === 'reply') r = await sb.from(table).update({ reply: row.querySelector('textarea').value.trim() || null }).eq('id', id);
+  else if (a === 'publish') r = await sb.from(table).update({ status: 'live' }).eq('id', id);
+  else if (a === 'remove') r = await sb.from(table).update({ status: 'removed' }).eq('id', id);
+  else if (a === 'delete') { if (!confirm('Delete this idea and its votes for good?')) return; r = await sb.from(table).delete().eq('id', id); }
+  if (r.error) return say('Didn’t save: ' + r.error.message);
+  say(a === 'reply' ? 'Reply saved.' : '');
+  if (a !== 'reply') show(tab);
+}
+$('list').onclick = e => { const b = e.target.closest('button[data-a]'); if (b) act(b.closest('.adm'), b.dataset.a); };
+$('list').onchange = e => { if (e.target.dataset.a === 'status') act(e.target.closest('.adm'), 'status', e.target.value); };
+
+start();
+</script>
+</body>
+</html>
