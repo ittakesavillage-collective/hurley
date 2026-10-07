@@ -38,6 +38,7 @@
   </form>
   <div id="panel" hidden>
     <div class="tabs" id="tabs">
+      <button data-t="notes">To Claude<span class="n" id="n-notes"></span></button>
       <button data-t="ideas">Ideas waiting<span class="n" id="n-ideas"></span></button>
       <button data-t="posts">Messages waiting<span class="n" id="n-posts"></span></button>
       <button data-t="all">All ideas</button>
@@ -57,7 +58,7 @@ const $ = id => document.getElementById(id);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const say = t => { $('msg').textContent = t; $('msg').hidden = !t; };
 const flag = on => { try { on ? localStorage.setItem('hurley.admin', '1') : localStorage.removeItem('hurley.admin'); } catch (e) {} };
-let tab = 'ideas';
+let tab = 'notes';
 
 async function start() {
   if (await isAdmin()) {
@@ -87,6 +88,31 @@ async function counts() {
     sb.from('posts').select('id', { count: 'exact', head: true }).eq('village', VILLAGE).eq('status', 'pending')
   ]);
   $('n-ideas').textContent = a.count || ''; $('n-posts').textContent = b.count || '';
+  const c = await sb.from('dev_notes').select('id', { count: 'exact', head: true }).eq('village', VILLAGE).not('status', 'in', '(done,parked)');
+  $('n-notes').textContent = c.count || '';
+}
+
+// Notes to Claude: private change/coding requests, picked up at "Review and Update"
+const NOTE = { new: 'New', doing: 'Claude is on it', done: 'Done', parked: 'Parked' };
+async function showNotes() {
+  const { data, error } = await sb.from('dev_notes').select('*').eq('village', VILLAGE).order('created_at', { ascending: false }).limit(50);
+  $('list').innerHTML = '<form id="nform" class="adm"><b>Note to Claude</b>'
+    + '<textarea id="nbody" maxlength="4000" rows="4" required placeholder="A change, a fix, a new idea for Hurley…"></textarea>'
+    + '<p class="note">Only you see these. Say “Review and Update” in the Hurley chat and Claude works through them.</p>'
+    + '<div class="btns"><button class="btn terra">Send to Claude</button></div></form>'
+    + (error ? '<p class="note">Couldn’t load notes: ' + esc(error.message) + '</p>'
+       : data.map(n => '<div class="item adm" data-id="' + n.id + '"><div class="row"><small>' + ago(n.created_at) + '</small>'
+         + '<span class="chip s-' + ({new:'pending',doing:'building',done:'done',parked:'suggested'})[n.status] + '">' + NOTE[n.status] + '</span></div>'
+         + '<span style="white-space:pre-wrap">' + esc(n.body) + '</span>'
+         + (n.reply ? '<span class="reply"><b>Claude:</b> ' + esc(n.reply) + '</span>' : '')
+         + '<div class="btns">' + (n.status === 'parked' ? '<button class="btn ghost" data-a="unpark">Un-park</button>' : n.status !== 'done' ? '<button class="btn ghost" data-a="park">Park</button>' : '')
+         + '<button class="btn danger" data-a="ndelete">Delete</button></div></div>').join(''));
+  $('nform').onsubmit = async e => {
+    e.preventDefault();
+    const { error } = await sb.from('dev_notes').insert({ village: VILLAGE, body: $('nbody').value.trim() });
+    if (error) return say('Didn’t send: ' + error.message);
+    say('Sent. Claude will pick it up at the next Review and Update.'); show('notes');
+  };
 }
 
 async function show(t) {
@@ -94,6 +120,7 @@ async function show(t) {
   document.querySelectorAll('#tabs button').forEach(b => b.setAttribute('aria-pressed', b.dataset.t === t));
   $('list').innerHTML = '<p class="note">Loading…</p>';
   counts();
+  if (t === 'notes') return showNotes();
   const ideas = t === 'ideas' || t === 'all';
   let q = ideas ? sb.from('request_list').select('*') : sb.from('posts').select('*');
   q = q.eq('village', VILLAGE).order('created_at', { ascending: false });
@@ -122,9 +149,11 @@ const postRow = r => '<div class="item adm" data-id="' + r.id + '"><b>' + esc(r.
 
 async function act(row, a, value) {
   const id = +row.dataset.id, ideas = tab === 'ideas' || tab === 'all';
-  const table = ideas ? 'requests' : 'posts';
+  const table = tab === 'notes' ? 'dev_notes' : ideas ? 'requests' : 'posts';
   let r;
-  if (a === 'approve') r = await sb.from(table).update({ status: 'suggested' }).eq('id', id);
+  if (a === 'park' || a === 'unpark') r = await sb.from(table).update({ status: a === 'park' ? 'parked' : 'new', updated_at: new Date().toISOString() }).eq('id', id);
+  else if (a === 'ndelete') { if (!confirm('Delete this note?')) return; r = await sb.from(table).delete().eq('id', id); }
+  else if (a === 'approve') r = await sb.from(table).update({ status: 'suggested' }).eq('id', id);
   else if (a === 'reject') r = await sb.from(table).update({ status: 'rejected' }).eq('id', id);
   else if (a === 'status') r = await sb.from(table).update({ status: value }).eq('id', id);
   else if (a === 'reply') r = await sb.from(table).update({ reply: row.querySelector('textarea').value.trim() || null }).eq('id', id);

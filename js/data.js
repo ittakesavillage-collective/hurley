@@ -1,5 +1,5 @@
 // Hurley app content. Placeholders (xxx) are filled in as real details arrive.
-const VERSION = '0.2.0';
+const VERSION = '0.3.0';
 
 // 24px line icons, drawn with currentColor
 const ICONS = {
