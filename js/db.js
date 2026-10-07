@@ -23,6 +23,13 @@ async function isAdmin() {
   return !!data;
 }
 
+// Profile lives on the phone for now; both name and role are needed to post.
+function profile() {
+  try { return { name: (localStorage.getItem('hurley.name') || '').trim(), role: localStorage.getItem('hurley.role') || '' }; }
+  catch (e) { return { name: '', role: '' }; }
+}
+const profileOk = () => { const p = profile(); return !!(p.name && p.role); };
+
 const STATUS = { pending: 'Waiting for approval', suggested: 'Suggested', planned: 'Planned', building: 'Being built', done: 'Done', rejected: 'Not going ahead', live: 'Live', removed: 'Removed' };
 const ago = t => {
   const s = (Date.now() - new Date(t)) / 1000;

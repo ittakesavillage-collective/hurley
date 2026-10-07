@@ -12,24 +12,52 @@
 <link rel="stylesheet" href="css/app.css">
 <script src="js/theme.js"></script>
 <title>Profile · Hurley</title>
+<style>
+.roles{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.roles button{min-height:52px;padding:8px 10px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);font-weight:600;cursor:pointer}
+.roles button[aria-pressed="true"]{border-color:var(--sage);background:var(--sage-soft);box-shadow:inset 0 0 0 1px var(--sage)}
+</style>
 </head>
 <body>
 <header class="bar"><div class="bar-in">
-  <a class="back" href="./">&larr; Home</a>
+  <a class="back" id="back" href="./">&larr; Home</a>
   <h1>Profile</h1>
 </div></header>
 <main class="wrap">
-  <section class="card">
-    <label class="f">Your name<input type="text" id="name" autocomplete="given-name" placeholder="e.g. Sam"></label>
-    <p class="note">Used later when you post on the message board. For now it stays on this phone.</p>
-  </section>
+  <form class="card" id="form">
+    <label class="f">Your name<input type="text" id="name" maxlength="40" autocomplete="name" placeholder="e.g. Sam Smith" required></label>
+    <b>Who are you in Hurley?</b>
+    <div class="roles" id="roles" role="group" aria-label="Who are you in Hurley?"></div>
+    <p class="note">Your name and this choice are shown with anything you post or suggest. You need both before you can post.</p>
+    <div class="btns"><button class="btn" id="save">Save</button></div>
+    <p class="note" id="msg" hidden></p>
+  </form>
   <section class="card"><dl class="facts"><dt>Village</dt><dd>Hurley</dd></dl></section>
-  <p class="note">Sign-in, favourites and notifications will live here.</p>
 </main>
+<script src="js/data.js"></script>
 <script>
-const n = document.getElementById('name');
-try { n.value = localStorage.getItem('hurley.name') || ''; } catch (e) {}
-n.oninput = () => { try { localStorage.setItem('hurley.name', n.value.trim()); } catch (e) {} };
+const $ = id => document.getElementById(id);
+const get = k => { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } };
+const put = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
+// Came here from a "Post" / "Suggest" button: go straight back to it after saving
+const back = new URLSearchParams(location.search).get('back');
+const safeBack = back && /^place\.html\?p=[a-z]+$/.test(back) ? back : '';
+if (safeBack) { $('back').href = safeBack; $('back').innerHTML = '&larr; Back'; $('save').textContent = 'Save and carry on'; }
+
+let role = get('hurley.role');
+$('name').value = get('hurley.name');
+const draw = () => $('roles').innerHTML = ROLES.map(r => '<button type="button" aria-pressed="' + (r === role) + '">' + r + '</button>').join('');
+draw();
+$('roles').onclick = e => { const b = e.target.closest('button'); if (b) { role = b.textContent; draw(); } };
+
+$('form').onsubmit = e => {
+  e.preventDefault();
+  const name = $('name').value.trim();
+  if (!name || !role) { $('msg').textContent = !name ? 'Please add your name.' : 'Please choose who you are in Hurley.'; $('msg').hidden = false; return; }
+  put('hurley.name', name); put('hurley.role', role);
+  if (safeBack) location.href = safeBack + '#post';
+  else { $('msg').textContent = 'Saved.'; $('msg').hidden = false; }
+};
 </script>
 </body>
 </html>

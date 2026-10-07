@@ -1,5 +1,8 @@
 // Hurley app content. Placeholders (xxx) are filled in as real details arrive.
-const VERSION = '0.3.0';
+const VERSION = '0.4.0';
+
+// Who you are in Hurley: one is required (with a name) before posting or suggesting
+const ROLES = ['Resident', 'Visitor', 'Work in Village', 'HRP Owner'];
 
 // 24px line icons, drawn with currentColor
 const ICONS = {

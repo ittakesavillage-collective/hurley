@@ -135,13 +135,13 @@ async function show(t) {
 const opts = cur => ['pending','suggested','planned','building','done','rejected'].map(s => '<option value="' + s + '"' + (s === cur ? ' selected' : '') + '>' + STATUS[s] + '</option>').join('');
 const ideaRow = r => '<div class="item adm" data-id="' + r.id + '"><b>' + esc(r.title) + '</b>'
   + (r.body ? '<span>' + esc(r.body) + '</span>' : '')
-  + '<small>' + ago(r.created_at) + ' · 👍 ' + r.ups + ' · 👎 ' + r.downs + '</small>'
+  + '<small>' + (r.name ? esc(r.name) + ' (' + esc(r.role) + ') · ' : '') + ago(r.created_at) + ' · 👍 ' + r.ups + ' · 👎 ' + r.downs + '</small>'
   + (r.status === 'pending'
       ? '<div class="btns"><button class="btn" data-a="approve">Approve</button><button class="btn danger" data-a="reject">Reject</button></div>'
       : '<div class="btns"><select data-a="status">' + opts(r.status) + '</select></div>')
   + '<textarea placeholder="Reply shown under the idea (optional)" maxlength="1000" rows="2">' + esc(r.reply) + '</textarea>'
   + '<div class="btns"><button class="btn ghost" data-a="reply">Save reply</button><button class="btn danger" data-a="delete">Delete</button></div></div>';
-const postRow = r => '<div class="item adm" data-id="' + r.id + '"><b>' + esc(r.title) + '</b><small>' + esc(r.name) + ' · ' + ago(r.created_at) + '</small>'
+const postRow = r => '<div class="item adm" data-id="' + r.id + '"><b>' + esc(r.title) + '</b><small>' + esc(r.name) + (r.role ? ' (' + esc(r.role) + ')' : '') + ' · ' + ago(r.created_at) + '</small>'
   + '<span>' + esc(r.body) + '</span><div class="btns">'
   + (r.status === 'pending' ? '<button class="btn" data-a="publish">Approve</button><button class="btn danger" data-a="remove">Reject</button>'
                             : '<button class="btn danger" data-a="remove">Take down</button>')

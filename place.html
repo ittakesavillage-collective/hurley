@@ -34,7 +34,16 @@ document.title = p.name + ' · Hurley';
 $('title').textContent = p.name;
 const hero = sub => '<div class="hero"><div class="ic">' + svg(p.id) + '</div><div><h2>' + esc(p.name) + '</h2>'
   + (sub ? '<p class="muted">' + esc(sub) + '</p>' : '') + '</div></div>';
-const myName = () => { try { return localStorage.getItem('hurley.name') || ''; } catch (e) { return ''; } };
+// No posting until the profile has a name and a role
+const gate = () => '<section class="card" id="gate"><b>First, tell us who you are</b>'
+  + '<p>To post or suggest an idea we need your name, and whether you’re a resident, a visitor, work in the village or own at Hurley Riverside Park.</p>'
+  + '<div class="btns"><a class="btn" href="profile.html?back=' + encodeURIComponent(location.pathname.split('/').pop() + location.search) + '">Fill in my profile</a></div></section>';
+const openForm = first => {
+  $('msg').hidden = true;
+  if (!profileOk()) { $('gatebox').innerHTML = gate(); $('new').hidden = true; return; }
+  const p = profile(); $('who').textContent = 'Posting as ' + p.name + ' (' + p.role + ')';
+  $('form').hidden = false; $('new').hidden = true; $(first).focus();
+};
 const OOPS = '<p class="note">Couldn’t reach Hurley’s noticeboard. Check your signal and try again.</p>';
 const errText = e => /Too many/.test(e && e.message) ? 'You already have 5 things waiting for approval. Please wait for those to be checked.' : 'Sorry, that didn’t send. Check your signal and try again.';
 
@@ -58,34 +67,33 @@ if (p.type === 'venue') {
   $('main').innerHTML = hero(p.intro)
     + '<div class="btns"><button class="btn terra" id="new">Post a message</button></div>'
     + '<form class="card" id="form" hidden>'
-    +   '<label class="f">Your name<input type="text" id="fname" maxlength="40" required></label>'
+    +   '<p class="note" id="who"></p>'
     +   '<label class="f">Subject<input type="text" id="ftitle" maxlength="120" minlength="3" required></label>'
     +   '<label class="f">Message<textarea id="fbody" maxlength="1000" rows="4" required></textarea></label>'
     +   '<p class="note">Messages are checked before they appear, usually within a day.</p>'
     +   '<div class="btns"><button class="btn" id="send">Send</button><button type="button" class="btn ghost" id="cancel">Cancel</button></div>'
     + '</form>'
-    + '<p class="note" id="msg" hidden></p>'
+    + '<div id="gatebox"></div><p class="note" id="msg" hidden></p>'
     + '<section class="card" id="list"><p class="note">Loading…</p></section>';
   const load = async () => {
     try {
-      const me = await ensureUser();
+      await ensureUser();
       const { data, error } = await sb.from('posts').select('*').eq('village', VILLAGE).neq('status', 'removed').order('created_at', { ascending: false }).limit(100);
       if (error) throw error;
       $('list').innerHTML = data.length ? data.map(r =>
-        '<div class="item"><b>' + esc(r.title) + '</b><small>' + esc(r.name) + ' · ' + ago(r.created_at)
+        '<div class="item"><b>' + esc(r.title) + '</b><small>' + esc(r.name) + (r.role ? ' (' + esc(r.role) + ')' : '') + ' · ' + ago(r.created_at)
         + (r.status === 'pending' ? ' · <span class="badge">Waiting for approval</span>' : '') + '</small><span>' + esc(r.body) + '</span></div>').join('')
         : '<p class="note">No messages yet. Be the first!</p>';
     } catch (e) { $('list').innerHTML = OOPS; }
   };
-  $('new').onclick = () => { $('form').hidden = false; $('new').hidden = true; $('msg').hidden = true; $('fname').value = myName(); ($('fname').value ? $('ftitle') : $('fname')).focus(); };
+  $('new').onclick = () => openForm('ftitle');
   $('cancel').onclick = () => { $('form').hidden = true; $('new').hidden = false; };
   $('form').onsubmit = async e => {
     e.preventDefault(); $('send').disabled = true;
     try {
       await ensureUser();
-      const name = $('fname').value.trim();
-      try { localStorage.setItem('hurley.name', name); } catch (err) {}
-      const { error } = await sb.from('posts').insert({ village: VILLAGE, name, title: $('ftitle').value.trim(), body: $('fbody').value.trim() });
+      if (!profileOk()) throw new Error('profile');
+      const { error } = await sb.from('posts').insert({ village: VILLAGE, ...profile(), title: $('ftitle').value.trim(), body: $('fbody').value.trim() });
       if (error) throw error;
       $('form').reset(); $('form').hidden = true; $('new').hidden = false;
       $('msg').textContent = 'Thanks! Your message will appear once it’s been checked.'; $('msg').hidden = false;
@@ -94,6 +102,7 @@ if (p.type === 'venue') {
     $('send').disabled = false;
   };
   load();
+  if (location.hash === '#post') { history.replaceState(null, '', location.pathname + location.search); openForm('ftitle'); }
 
 } else {
   // Your App, your way: approved requests, thumbs up/down (one vote per phone), suggest a new one
@@ -101,12 +110,13 @@ if (p.type === 'venue') {
     + '<section class="card"><p>Suggest a tweak or a whole new feature, give other people’s ideas a thumbs up or down, and we build what Hurley asks for.</p></section>'
     + '<div class="btns"><button class="btn terra" id="new">Suggest an idea</button></div>'
     + '<form class="card" id="form" hidden>'
+    +   '<p class="note" id="who"></p>'
     +   '<label class="f">Your idea<input type="text" id="ftitle" maxlength="120" minlength="3" required placeholder="e.g. Bus times on the home screen"></label>'
     +   '<label class="f">More detail (optional)<textarea id="fbody" maxlength="1000" rows="3"></textarea></label>'
     +   '<p class="note">Ideas are checked before they go on the list, usually within a day.</p>'
     +   '<div class="btns"><button class="btn" id="send">Send</button><button type="button" class="btn ghost" id="cancel">Cancel</button></div>'
     + '</form>'
-    + '<p class="note" id="msg" hidden></p>'
+    + '<div id="gatebox"></div><p class="note" id="msg" hidden></p>'
     + '<section class="card" id="list"><p class="note">Loading…</p></section>';
   let me = null, mine = {};
   const ORDER = { pending: 0, building: 1, planned: 2, suggested: 3, done: 4 };
@@ -142,13 +152,14 @@ if (p.type === 'venue') {
     } catch (err) { $('msg').textContent = errText(err); $('msg').hidden = false; }
     load();
   };
-  $('new').onclick = () => { $('form').hidden = false; $('new').hidden = true; $('msg').hidden = true; $('ftitle').focus(); };
+  $('new').onclick = () => openForm('ftitle');
   $('cancel').onclick = () => { $('form').hidden = true; $('new').hidden = false; };
   $('form').onsubmit = async e => {
     e.preventDefault(); $('send').disabled = true;
     try {
       await ensureUser();
-      const { error } = await sb.from('requests').insert({ village: VILLAGE, title: $('ftitle').value.trim(), body: $('fbody').value.trim() || null });
+      if (!profileOk()) throw new Error('profile');
+      const { error } = await sb.from('requests').insert({ village: VILLAGE, ...profile(), title: $('ftitle').value.trim(), body: $('fbody').value.trim() || null });
       if (error) throw error;
       $('form').reset(); $('form').hidden = true; $('new').hidden = false;
       $('msg').textContent = 'Thanks! Your idea will go on the list once it’s been checked.'; $('msg').hidden = false;
@@ -157,6 +168,7 @@ if (p.type === 'venue') {
     $('send').disabled = false;
   };
   load();
+  if (location.hash === '#post') { history.replaceState(null, '', location.pathname + location.search); openForm('ftitle'); }
 }
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
 </script>
