@@ -1,37 +1,48 @@
-from PIL import Image, ImageFilter, ImageDraw
+# Builds every Hurley icon size from Michael's artwork, keeping his tile exactly as drawn (texture and all).
+# Source: hurley-icon-source-v6.jpg (1408x768, tile on black). Run: python icons/make_icons.py
+from PIL import Image, ImageDraw, ImageFilter
 import os
 os.chdir(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
 
-src = Image.open('icons/hurley-icon-source-v5.jpg').convert('RGB')
-# White line-art region, with a little margin
-box = (478, 186, 933, 578)
-art = src.crop(box)
-# Whiteness: low saturation + bright. Use the minimum channel (terracotta has a low blue/green).
-L = art.split()[2].point(lambda v: 0 if v < 110 else 255 if v > 200 else int((v - 110) * 255 / 90))
+im = Image.open('icons/hurley-icon-source-v6.jpg').convert('RGB')
+# Square from just inside the tile (tile spans x427-980, y92-676), centred on the artwork
+L, T, S = 441, 121, 526
+tile = im.crop((L, T, L + S, T + S))
+px = tile.load()
 
-S = 4
-big = L.resize((art.width * S, art.height * S), Image.LANCZOS).filter(ImageFilter.GaussianBlur(S * 0.6))
-# Re-threshold to a crisp, smooth edge (narrow ramp = sharp but anti-aliased)
-alpha = big.point(lambda v: 0 if v < 110 else 255 if v > 146 else int((v - 110) * 255 / 36))
+# The very corners fall outside the tile's own rounding: patch them from just inside.
+# (Phones round icon corners off anyway, so this only matters for square uses like the favicon.)
+def is_tile(p):
+    r, g, b = p
+    return r > 120 and r - g > 50 and b < 110
+Z = 40
+for y in range(S):
+    for x in range(S):
+        if (x < Z or x >= S - Z) and (y < Z or y >= S - Z) and not is_tile(px[x, y]):
+            px[x, y] = px[x + Z if x < Z else x - Z, y + Z if y < Z else y - Z]
 
-def icon(size, art_frac, name):
-    # Flat, clean terracotta gradient (darker top, warmer bottom) like the original tile
-    top, bot = (164, 76, 45), (192, 98, 64)
+def full(size, name):
+    tile.resize((size, size), Image.LANCZOS).save(name)
+
+def padded(size, frac, name):
+    # Android "maskable": artwork inside the safe circle, tile faded into a matching gradient
+    top, bot = (164, 70, 40), (192, 92, 60)
     bg = Image.new('RGB', (size, size))
     d = ImageDraw.Draw(bg)
     for y in range(size):
         t = y / (size - 1)
         d.line([(0, y), (size, y)], fill=tuple(int(top[i] + (bot[i] - top[i]) * t) for i in range(3)))
-    w = int(size * art_frac)
-    a = alpha.resize((w, int(w * alpha.height / alpha.width)), Image.LANCZOS)
-    white = Image.new('RGB', a.size, (255, 255, 255))
-    bg.paste(white, ((size - a.width) // 2, (size - a.height) // 2), a)
+    w = int(size * frac)
+    a = tile.resize((w, w), Image.LANCZOS)
+    m = Image.new('L', (w, w), 0)
+    ImageDraw.Draw(m).rounded_rectangle((w * .06, w * .06, w * .94, w * .94), radius=w * .12, fill=255)
+    bg.paste(a, ((size - w) // 2, (size - w) // 2), m.filter(ImageFilter.GaussianBlur(w * .03)))
     bg.save(name)
 
-icon(1024, 0.76, 'icons/icon-1024.png')
-icon(512, 0.76, 'icons/icon-512.png')
-icon(192, 0.76, 'icons/icon-192.png')
-icon(180, 0.76, 'icons/apple-touch-icon.png')
-icon(32, 0.86, 'icons/favicon-32.png')
-icon(512, 0.60, 'icons/icon-maskable-512.png')
+full(1024, 'icons/icon-1024.png')
+full(512, 'icons/icon-512.png')
+full(192, 'icons/icon-192.png')
+full(180, 'icons/apple-touch-icon.png')
+full(32, 'icons/favicon-32.png')
+padded(512, 0.80, 'icons/icon-maskable-512.png')
 print('ok')
