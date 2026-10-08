@@ -1,5 +1,5 @@
-// Hurley app content. Placeholders (xxx) are filled in as real details arrive.
-const VERSION = '0.7.1';
+﻿// Hurley app content. Placeholders (xxx) are filled in as real details arrive.
+const VERSION = '0.7.2';
 
 // Who you are in Hurley: one is required (with a name) before posting or suggesting
 const ROLES = ['Resident', 'Visitor', 'Work in Village', 'HRP Owner'];
