@@ -46,7 +46,8 @@ const openForm = first => {
   $('msg').hidden = true;
   if (!profileOk()) { $('gatebox').innerHTML = gate(); $('new').hidden = true; return; }
   const p = profile(); $('who').textContent = 'Posting as ' + p.name + ' (' + p.role + ')';
-  $('form').hidden = false; $('new').hidden = true; $(first).focus();
+  $('form').hidden = false; $('new').hidden = true;
+  $('form').scrollIntoView({ block: 'start' }); $(first).focus({ preventScroll: true });
 };
 const OOPS = '<p class="note">Couldn’t reach Hurley’s noticeboard. Check your signal and try again.</p>';
 const errText = e => /Too many/.test(e && e.message) ? 'You already have 5 things waiting for approval. Please wait for those to be checked.' : 'Sorry, that didn’t send. Check your signal and try again.';

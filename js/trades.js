@@ -105,7 +105,8 @@ function renderTrades(main, hero) {
     say('');
     if (!canRecommend()) { $('gatebox').innerHTML = gateMsg(); $('new').hidden = true; return; }
     const pr = profile(); $('who').textContent = 'Recommending as ' + pr.name + ' (' + pr.role + ')';
-    $('form').hidden = false; $('new').hidden = true; $('tname').focus();
+    $('form').hidden = false; $('new').hidden = true;
+    $('form').scrollIntoView({ block: 'start' }); $('tname').focus({ preventScroll: true });
   };
   $('cancel').onclick = () => { $('form').hidden = true; $('new').hidden = false; };
   $('form').onsubmit = async e => {

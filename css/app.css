@@ -125,3 +125,8 @@ textarea{resize:vertical;min-height:96px}
 .rec small{color:var(--muted);white-space:nowrap}
 select{min-height:48px;padding:10px 12px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);font:inherit;font-weight:400}
 input[type=tel],input[type=url],input[type=month]{min-height:48px;padding:10px 14px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);font-weight:400}
+
+/* Typing should never zoom or jolt the page: iPhones auto-zoom any box under 16px,
+   and forms open already scrolled into place (clear of the sticky top bar). */
+input,textarea,select{font-size:max(16px,1em)}
+form{scroll-margin-top:76px}
