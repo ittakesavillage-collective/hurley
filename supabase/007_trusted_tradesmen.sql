@@ -1,0 +1,6 @@
+-- Applied 2026-10-08 via the Supabase connector.
+-- trades (pending/live/removed, admin approves) + trade_recs (one per person per trade; role must be
+-- Resident or HRP Owner). RLS: read live/own/admin; recs readable for visible trades. limit_pending now
+-- counts trades; alert_new_trade trigger -> admin push "New tradesperson to approve".
+-- 008 fix_alert_admins_key: alert_admins() reads the row key via to_jsonb(new) (new.user_id on
+-- posts/requests/trades raised "record new has no field" and blocked the insert).

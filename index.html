@@ -38,7 +38,7 @@
 
 <script src="js/data.js"></script>
 <script>
-document.getElementById('grid').innerHTML = PLACES.map(p =>
+document.getElementById('grid').innerHTML = PLACES.filter(p => !p.hidden).map(p =>
   '<a class="tile' + (p.id === 'yourway' ? ' yay' : '') + '" href="place.html?p=' + p.id + '">' + svg(p.id) + '<b>' + p.name + '</b></a>').join('');
 document.getElementById('ver').textContent = 'v' + VERSION;
 // Install nudge: only in a normal browser tab, until dismissed

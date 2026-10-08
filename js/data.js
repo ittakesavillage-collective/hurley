@@ -1,5 +1,5 @@
 // Hurley app content. Placeholders (xxx) are filled in as real details arrive.
-const VERSION = '0.6.5';
+const VERSION = '0.7.0';
 
 // Who you are in Hurley: one is required (with a name) before posting or suggesting
 const ROLES = ['Resident', 'Visitor', 'Work in Village', 'HRP Owner'];
@@ -13,6 +13,7 @@ const ICONS = {
   shop:'<path d="M4 9h16l-1.5-4h-13zM5 9v11h14V9M9.5 20v-6h5v6"/>',
   riverside:'<path d="M3 19l7-13 7 13zM10 6v13M2 22c2-1.3 4-1.3 6 0s4 1.3 6 0 4-1.3 6 0"/>',
   info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/>',
+  trades:'<path d="M14.7 6.3a4 4 0 0 0-5.4 5.2L3.6 17.2a1.9 1.9 0 0 0 2.7 2.7l5.7-5.7a4 4 0 0 0 5.2-5.4l-2.6 2.6-2.3-.5-.5-2.3z"/>',
   yourway:'<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/>'
 };
 const svg = (k, cls) => '<svg viewBox="0 0 24 24" aria-hidden="true"' + (cls ? ' class="' + cls + '"' : '') +
@@ -35,7 +36,10 @@ const PLACES = [
   {id:'riverside', name:'Hurley Riverside Park', type:'venue', kind:'Caravan & camping park',
     about:'xxx short description of Hurley Riverside Park.', hours:'xxx', phone:'xxx', web:'', map:'Hurley Riverside Park'},
   {id:'info', name:'Useful Info', type:'list', intro:'Handy numbers and dates for Hurley.',
+    links:[{id:'trades', t:'Trusted Tradesmen', d:'Recommended by Hurley residents and Riverside Park owners'}],
     items:[{t:'Bin collections', b:'xxx'}, {t:'Doctor\u2019s surgery', b:'xxx'}, {t:'Bus times', b:'xxx'},
            {t:'Parish council', b:'xxx'}, {t:'Church', b:'xxx'}, {t:'Emergencies', b:'999 \u00b7 non-emergency police 101 \u00b7 NHS 111'}]},
-  {id:'yourway', name:'Your App, your way', type:'yourway'}
+  {id:'yourway', name:'Your App, your way', type:'yourway'},
+  // Not on the home grid: reached from Useful Info
+  {id:'trades', name:'Trusted Tradesmen', type:'trades', hidden:true, parent:'info'}
 ];

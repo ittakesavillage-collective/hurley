@@ -1,6 +1,6 @@
 // send-push. Two jobs:
 //  1. Admin sends (signed-in admin only): { village, title, body, url?, role?, user_id? }
-//  2. Admin alerts from DB triggers (new message / idea / profile): { alert, key } -> admin phones only
+//  2. Admin alerts from DB triggers (new message / idea / profile / tradesperson): { alert, key } -> admin phones only
 // Secret needed (Supabase > Edge Functions > Secrets): VAPID_PRIVATE_KEY
 import { createClient } from "npm:@supabase/supabase-js@2";
 import webpush from "npm:web-push@3.6.7";
@@ -77,7 +77,7 @@ async function sendAll(admin: any, subs: Sub[], msg: { title: string; body: stri
 // deno-lint-ignore no-explicit-any
 async function adminAlert(admin: any, table: string, key: string) {
   const keyCol = table === "profiles" ? "user_id" : "id";
-  if (!["posts", "requests", "profiles"].includes(table) || !key) return { skipped: "bad alert" };
+  if (!["posts", "requests", "profiles", "trades"].includes(table) || !key) return { skipped: "bad alert" };
   // Claim the row: only the first call within 10 minutes of creation wins
   const since = new Date(Date.now() - 10 * 60 * 1000).toISOString();
   const { data: row } = await admin.from(table).update({ alerted_at: new Date().toISOString() })
@@ -85,7 +85,8 @@ async function adminAlert(admin: any, table: string, key: string) {
   if (!row) return { skipped: "already alerted or not found" };
 
   const who = `${row.name} (${row.role})`;
-  const msg = table === "posts" ? { title: "New message to approve", body: `${row.title} · ${who}`, url: "admin.html" }
+  const msg = table === "trades" ? { title: "New tradesperson to approve", body: `${row.name} · ${row.trade}`, url: "admin.html" }
+    : table === "posts" ? { title: "New message to approve", body: `${row.title} · ${who}`, url: "admin.html" }
     : table === "requests" ? { title: "New idea to approve", body: `${row.title} · ${who}`, url: "admin.html" }
     : { title: "New Hurley user", body: who, url: "admin.html" };
 

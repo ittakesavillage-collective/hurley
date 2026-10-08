@@ -25,7 +25,7 @@ body{margin:0;background:var(--cream);color:var(--ink);font-family:var(--font);f
 h1,h2,h3{margin:0;font-weight:700;line-height:1.15;text-wrap:balance}
 p{margin:0}
 a{color:var(--terra-ink)}
-button,a,input{font:inherit}
+button,a,input,textarea,select{font:inherit}
 :focus-visible{outline:3px solid var(--terra);outline-offset:2px;border-radius:6px}
 
 /* Top bar */
@@ -103,3 +103,25 @@ textarea{resize:vertical;min-height:96px}
 .vote{min-height:40px;min-width:64px;padding:6px 12px;border-radius:999px;border:1.5px solid var(--line);background:none;color:var(--ink);font-weight:600;cursor:pointer}
 .vote.on{border-color:var(--sage);background:var(--sage-soft)}
 .vote:disabled{opacity:.6}
+
+/* Link card (e.g. Useful Info -> Trusted Tradesmen) */
+.linkcard{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:18px;background:var(--sage);color:var(--on-sage);text-decoration:none}
+.linkcard .ic{width:44px;height:44px;border-radius:12px;background:rgb(255 255 255 / .18);display:grid;place-items:center;flex:none}
+.linkcard .ic svg{width:26px;height:26px}
+.linkcard span:nth-child(2){flex:1;display:flex;flex-direction:column;gap:2px}
+.linkcard b{font-size:1.08em}
+.linkcard small{opacity:.9;font-size:13px}
+.linkcard .chev{font-size:30px;line-height:1;opacity:.8}
+
+/* Trusted Tradesmen */
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.fchip{min-height:36px;padding:4px 12px;border-radius:999px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);font-weight:500;cursor:pointer}
+.fchip[aria-pressed="true"]{background:var(--ink);color:var(--cream);border-color:var(--ink)}
+#list{display:flex;flex-direction:column;gap:12px}
+.trade .row{align-items:flex-start}
+.trade .tn{font-size:1.1em}
+.chip.trusted{background:var(--sage);color:var(--on-sage)}
+.rec{padding:8px 12px;border-left:3px solid var(--gold);background:var(--cream);border-radius:0 10px 10px 0;font-size:.95em}
+.rec small{color:var(--muted);white-space:nowrap}
+select{min-height:48px;padding:10px 12px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);font:inherit;font-weight:400}
+input[type=tel],input[type=url],input[type=month]{min-height:48px;padding:10px 14px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);font-weight:400}

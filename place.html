@@ -24,6 +24,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/data.js"></script>
 <script src="js/db.js"></script>
+<script src="js/trades.js"></script>
 <script>
 const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 // Placeholder text (starts with xxx) shows greyed out
@@ -32,6 +33,9 @@ const $ = id => document.getElementById(id);
 const p = PLACES.find(x => x.id === new URLSearchParams(location.search).get('p')) || PLACES[0];
 document.title = p.name + ' · Hurley';
 $('title').textContent = p.name;
+// Sub-pages go back to their parent page, not home
+const par = p.parent && PLACES.find(x => x.id === p.parent);
+if (par) { const b = document.querySelector('.back'); b.href = 'place.html?p=' + par.id; b.innerHTML = '&larr; ' + esc(par.name); }
 const hero = sub => '<div class="hero"><div class="ic">' + svg(p.id) + '</div><div><h2>' + esc(p.name) + '</h2>'
   + (sub ? '<p class="muted">' + esc(sub) + '</p>' : '') + '</div></div>';
 // No posting until the profile has a name and a role
@@ -59,8 +63,13 @@ if (p.type === 'venue') {
     + '</div>';
 
 } else if (p.type === 'list') {
-  $('main').innerHTML = hero(p.intro) + '<section class="card">' + p.items.map(i =>
+  $('main').innerHTML = hero(p.intro)
+    + (p.links || []).map(l => '<a class="linkcard" href="place.html?p=' + l.id + '"><span class="ic">' + svg(l.id) + '</span><span><b>' + esc(l.t) + '</b><small>' + esc(l.d) + '</small></span><span class="chev">\u203a</span></a>').join('')
+    + '<section class="card">' + p.items.map(i =>
       '<div class="item"><b>' + val(i.t) + '</b>' + (i.d ? '<small>' + val(i.d) + '</small>' : '') + '<span>' + val(i.b) + '</span></div>').join('') + '</section>';
+
+} else if (p.type === 'trades') {
+  renderTrades($('main'), hero);
 
 } else if (p.type === 'board') {
   // Message board: live posts; new posts wait for approval before everyone sees them
