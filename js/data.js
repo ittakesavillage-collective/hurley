@@ -1,5 +1,5 @@
 ﻿// Hurley app content. Placeholders (xxx) are filled in as real details arrive.
-const VERSION = '0.7.2';
+const VERSION = '0.7.3';
 
 // Who you are in Hurley: one is required (with a name) before posting or suggesting
 const ROLES = ['Resident', 'Visitor', 'Work in Village', 'HRP Owner'];
@@ -36,10 +36,10 @@ const PLACES = [
   {id:'riverside', name:'Hurley Riverside Park', type:'venue', kind:'Caravan & camping park',
     about:'xxx short description of Hurley Riverside Park.', hours:'xxx', phone:'xxx', web:'', map:'Hurley Riverside Park'},
   {id:'info', name:'Useful Info', type:'list', intro:'Handy numbers and dates for Hurley.',
-    links:[{id:'trades', t:'Trusted Tradesmen', d:'Recommended by Hurley residents and Riverside Park owners'}],
+    links:[{id:'trades', t:'Trusted Tradespeople', d:'Recommended by Hurley residents and Riverside Park owners'}],
     items:[{t:'Bin collections', b:'xxx'}, {t:'Doctor\u2019s surgery', b:'xxx'}, {t:'Bus times', b:'xxx'},
            {t:'Parish council', b:'xxx'}, {t:'Church', b:'xxx'}, {t:'Emergencies', b:'999 \u00b7 non-emergency police 101 \u00b7 NHS 111'}]},
   {id:'yourway', name:'Your App, your way', type:'yourway'},
   // Not on the home grid: reached from Useful Info
-  {id:'trades', name:'Trusted Tradesmen', type:'trades', hidden:true, parent:'info'}
+  {id:'trades', name:'Trusted Tradespeople', type:'trades', hidden:true, parent:'info'}
 ];
