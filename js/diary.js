@@ -18,7 +18,7 @@ const repeatText = n => (REPEATS.find(r => r[0] === (n || 0)) || [0, 'Every ' + 
 
 // Upcoming list for the diary page: next 28 days, grouped by date
 function renderDiary(main, hero, esc) {
-  main.innerHTML = hero('What’s coming up in Willian.') + '<section class="card" id="dlist"><p class="note">Loading…</p></section>';
+  main.innerHTML = hero('What’s coming up in Hurley.') + '<section class="card" id="dlist"><p class="note">Loading…</p></section>';
   (async () => {
     try {
       await ensureUser();
