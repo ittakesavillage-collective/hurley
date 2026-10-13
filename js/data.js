@@ -1,5 +1,5 @@
 ﻿// Hurley app content. Placeholders (xxx) are filled in as real details arrive.
-const VERSION = '0.7.3';
+const VERSION = '0.8.0';
 
 // Who you are in Hurley: one is required (with a name) before posting or suggesting
 const ROLES = ['Resident', 'Visitor', 'Work in Village', 'HRP Owner'];
@@ -13,6 +13,7 @@ const ICONS = {
   shop:'<path d="M4 9h16l-1.5-4h-13zM5 9v11h14V9M9.5 20v-6h5v6"/>',
   riverside:'<path d="M3 19l7-13 7 13zM10 6v13M2 22c2-1.3 4-1.3 6 0s4 1.3 6 0 4-1.3 6 0"/>',
   info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/>',
+  diary:'<path d="M4 6h16v14H4zM4 10.5h16M8 3.5v4M16 3.5v4M8 14.5h3"/>',
   trades:'<path d="M14.7 6.3a4 4 0 0 0-5.4 5.2L3.6 17.2a1.9 1.9 0 0 0 2.7 2.7l5.7-5.7a4 4 0 0 0 5.2-5.4l-2.6 2.6-2.3-.5-.5-2.3z"/>',
   yourway:'<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/>'
 };
@@ -27,6 +28,7 @@ const PLACES = [
            {t:'xxx headline', d:'xxx date', b:'xxx summary of the story.'},
            {t:'xxx headline', d:'xxx date', b:'xxx summary of the story.'}]},
   {id:'board', name:'Message Board', type:'board', intro:'Notices, lost & found, offers of help and things for sale.'},
+  {id:'diary', name:'Diary', type:'diary'},
   {id:'oldebell', name:'Olde Bell', type:'venue', kind:'Hotel, restaurant & bar',
     about:'xxx short description of the Olde Bell.', hours:'xxx', phone:'xxx', web:'', map:'Ye Olde Bell, Hurley'},
   {id:'risingsun', name:'Rising Sun', type:'venue', kind:'Pub',

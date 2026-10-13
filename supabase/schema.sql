@@ -131,3 +131,17 @@ alter table public.dev_notes enable row level security;
 drop policy if exists "admin only" on public.dev_notes;
 create policy "admin only" on public.dev_notes for all using (public.is_admin()) with check (public.is_admin());
 grant select, insert, update, delete on public.dev_notes to authenticated;
+
+-- ---------- Diary (v0.8.0): bin days + events, with optional 7pm-the-evening-before alerts ----------
+-- Applied 2026-10-13 via the Supabase connector (migration diary_and_eve_alerts). Same design as the Willian app.
+-- Entries repeat every N days from starts_on (7 weekly, 14 fortnightly, null once). alert_eve = push to everyone
+-- at 7pm London the evening before. pg_cron runs 18:00 + 19:00 UTC; send-push only acts when it is 7pm in London,
+-- and diary_sent stops a double send.
+create table if not exists public.diary (
+  id bigint generated always as identity primary key,
+  village text not null default 'hurley' check (village = 'hurley'),
+  title text not null check (char_length(btrim(title)) between 1 and 80),
+  details text check (char_length(details) <= 300),
+  starts_on date not null, every_days int check (every_days between 1 and 366), ends_on date,
+  alert_eve boolean not null default false, created_at timestamptz not null default now());
+-- RLS: everyone signed in reads; admin writes. diary_sent: service role only. cron job 'diary-eve-alert' -> send-push {"diary":true}.
