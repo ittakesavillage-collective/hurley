@@ -1,5 +1,5 @@
 ﻿// Hurley app content. Placeholders (xxx) are filled in as real details arrive.
-const VERSION = '0.8.4';
+const VERSION = '0.8.5';
 
 // Who you are in Hurley: one is required (with a name) before posting or suggesting
 const ROLES = ['Resident', 'Visitor', 'Work in Village', 'HRP Owner'];
@@ -37,7 +37,7 @@ const PLACES = [
     about:'xxx short description of the village shop.', hours:'xxx', phone:'xxx', web:'', map:'Hurley village shop'},
   {id:'riverside', name:'Hurley Riverside Park', type:'venue', kind:'Caravan & camping park',
     about:'xxx short description of Hurley Riverside Park.', hours:'xxx', phone:'xxx', web:'', map:'Hurley Riverside Park'},
-  {id:'info', name:'Useful Info', type:'list', intro:'Handy numbers and dates for Hurley.',
+  {id:'info', name:'Useful info & trusted tradespeople', type:'list', intro:'Handy numbers and dates for Hurley.',
     links:[{id:'trades', t:'Trusted Tradespeople', d:'Recommended by Hurley residents and Riverside Park owners'}],
     items:[{t:'Bin collections', b:'xxx'}, {t:'Doctor\u2019s surgery', b:'xxx'}, {t:'Bus times', b:'xxx'},
            {t:'Parish council', b:'xxx'}, {t:'Church', b:'xxx'}, {t:'Emergencies', b:'999 \u00b7 non-emergency police 101 \u00b7 NHS 111'}]},

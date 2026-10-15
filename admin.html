@@ -108,6 +108,8 @@ async function counts() {
   $('n-notes').textContent = c.count || '';
   const d = await sb.from('trades').select('id', { count: 'exact', head: true }).eq('village', VILLAGE).eq('status', 'pending');
   $('n-trades').textContent = d.count || '';
+  const waiting = (a.count || 0) + (b.count || 0) + (d.count || 0);
+  try { if (navigator.setAppBadge) { waiting ? navigator.setAppBadge(waiting) : navigator.clearAppBadge(); } } catch (x) {}
 }
 
 // Notes to Claude: private change/coding requests, picked up at "Review and Update"

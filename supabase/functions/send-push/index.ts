@@ -88,10 +88,13 @@ async function adminAlert(admin: any, table: string, key: string) {
   if (!row) return { skipped: "already alerted or not found" };
 
   const who = `${row.name} (${row.role})`;
-  const msg = table === "trades" ? { title: "New tradesperson to approve", body: `${row.name} · ${row.trade}`, url: "admin.html" }
+  const pending = async (t: string, st: string) => (await admin.from(t).select("id", { count: "exact", head: true }).eq("status", st)).count ?? 0;
+  const badge = (await pending("requests", "pending")) + (await pending("posts", "pending")) + (await pending("trades", "pending"));
+  const msg1 = table === "trades" ? { title: "New tradesperson to approve", body: `${row.name} · ${row.trade}`, url: "admin.html" }
     : table === "posts" ? { title: "New message to approve", body: `${row.title} · ${who}`, url: "admin.html" }
     : table === "requests" ? { title: "New idea to approve", body: `${row.title} · ${who}`, url: "admin.html" }
     : { title: "New Hurley user", body: who, url: "admin.html" };
+  const msg = { ...msg1, badge };
 
   const { data: admins } = await admin.from("admins").select("user_id");
   const ids = (admins ?? []).map((a: { user_id: string }) => a.user_id);
@@ -115,10 +118,20 @@ async function diaryEve(admin: any) {
   if (claim) return { skipped: "already sent for " + tomorrowStr };
 
   const { data: rows } = await admin.from("diary").select("*").eq("alert_eve", true);
-  const hit = (rows ?? []).filter((e: { starts_on: string; every_days: number | null; ends_on: string | null }) => {
+  // Day number of the nth (1-4) or last (5) weekday (0 = Sunday) in a month
+  const nthWeekday = (y: number, m: number, wd: number, n: number) => {
+    if (n === 5) { const last = Date.UTC(y, m + 1, 0) / DAY; return last - ((new Date(last * DAY).getUTCDay() - wd + 7) % 7); }
+    const first = Date.UTC(y, m, 1) / DAY;
+    return first + ((wd - new Date(first * DAY).getUTCDay() + 7) % 7) + (n - 1) * 7;
+  };
+  const hit = (rows ?? []).filter((e: { starts_on: string; every_days: number | null; nth: number | null; ends_on: string | null }) => {
     const s = new Date(e.starts_on + "T00:00:00Z").getTime() / DAY;
     if (tomorrow < s) return false;
     if (e.ends_on && tomorrow > new Date(e.ends_on + "T00:00:00Z").getTime() / DAY) return false;
+    if (e.nth) {
+      const t = new Date(tomorrow * DAY);
+      return tomorrow === nthWeekday(t.getUTCFullYear(), t.getUTCMonth(), new Date(s * DAY).getUTCDay(), e.nth);
+    }
     return e.every_days ? (tomorrow - s) % e.every_days === 0 : tomorrow === s;
   });
   if (!hit.length) return { skipped: "nothing to alert for " + tomorrowStr };
