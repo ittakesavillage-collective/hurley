@@ -1,6 +1,6 @@
 // Hurley app content. Venue/info details researched 2026-10-22 from official sites, CAMRA and council
 // listings: check on the ground and correct here.
-const VERSION = '0.9.5';
+const VERSION = '0.9.6';
 
 // RULE (Michael, 2026-10-22): accommodation listings get NO links, phone numbers or call buttons until
 // commercial terms are agreed with each venue, one by one. Venue pages use noContact:true.
@@ -88,6 +88,8 @@ const PLACES = [
             u:'https://www.nhs.uk/service-search/find-a-gp', ut:'Find a GP'},
            {t:'Parish council', b:'Hurley Parish Council meets on the third Thursday of each month. Clerk: clerk@hurleyparish.org.uk \u00b7 07799 302998',
             u:'https://hurleyparish.org.uk/', ut:'hurleyparish.org.uk'},
+           {t:'Village Hall & Village Association', b:'Hurley Village Hall, High Street SL6 5LT. The Hurley Village Association runs the hall and village events: chair@hurleyvillage.co.uk · 07901 297223',
+            u:'https://www.hurleyvillage.co.uk/', ut:'hurleyvillage.co.uk'},
            {t:'Emergencies', b:'999 \u00b7 non-emergency police 101 \u00b7 NHS 111'}]},
   {id:'yourway', name:'Your App, your way', type:'yourway'},
   // Not on the home grid: reached from Useful Info

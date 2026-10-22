@@ -10,6 +10,8 @@ function renderNews(main, hero, esc) {
     +   '<div class="btns"><button class="btn terra" id="nsend">Post</button></div></form>'
     + '<p class="note" id="msg" hidden></p>'
     + '<div id="list"><p class="note">Loading…</p></div>'
+    + '<a class="linkcard ghostcard" target="_blank" rel="noopener" href="https://www.hurleyvillage.co.uk/what-s-on">'
+    +   '<span><b>What’s on in Hurley</b><small>The village website’s events page</small></span><span class="chev">›</span></a>'
     + '<a class="linkcard ghostcard" target="_blank" rel="noopener" href="https://www.henleystandard.co.uk/news/hurley/">'
     +   '<span><b>More Hurley news</b><small>The Henley Standard’s Hurley pages</small></span><span class="chev">›</span></a>';
   const say = t => { $('msg').textContent = t; $('msg').hidden = !t; };
