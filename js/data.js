@@ -1,6 +1,6 @@
 // Hurley app content. Venue/info details researched 2026-10-22 from official sites, CAMRA and council
 // listings: check on the ground and correct here.
-const VERSION = '0.9.0';
+const VERSION = '0.9.1';
 
 // Who you are in Hurley: one is required (with a name) before posting or suggesting
 const ROLES = ['Resident', 'Visitor', 'Work in Village', 'HRP Owner'];
@@ -12,6 +12,9 @@ const ICONS = {
   oldebell:'<path d="M12 3a1.5 1.5 0 0 1 1.5 1.5v.6A6 6 0 0 1 18 11v4l2 2.5H4L6 15v-4a6 6 0 0 1 4.5-5.9v-.6A1.5 1.5 0 0 1 12 3zM10 20.5a2 2 0 0 0 4 0"/>',
   risingsun:'<path d="M3 18h18M6.5 18a5.5 5.5 0 0 1 11 0M12 6.5V9M5.5 9.5l1.6 1.6M18.5 9.5l-1.6 1.6M2.5 14.5h2M19.5 14.5h2"/>',
   shop:'<path d="M4 9h16l-1.5-4h-13zM5 9v11h14V9M9.5 20v-6h5v6"/>',
+  stay:'<path d="M3 11l9-7 9 7M5 9.5V20h14V9.5"/><path d="M8.5 20v-4.5a1 1 0 0 1 1-1h5a1 1 0 0 1 1 1V20M8.5 15.5h7"/>',
+  holidays:'<path d="M4 8h16v11H4zM9 8V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V8M4 13h16"/>',
+  hurleyford:'<path d="M3 7h13a3 3 0 0 1 3 3v6H3zM19 13h2.5M7 16v2.5M12 16v2.5M6 10h3v3H6zM12 10h3v3h-3z"/>',
   riverside:'<path d="M3 19l7-13 7 13zM10 6v13M2 22c2-1.3 4-1.3 6 0s4 1.3 6 0 4-1.3 6 0"/>',
   info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/>',
   diary:'<path d="M4 6h16v14H4zM4 10.5h16M8 3.5v4M16 3.5v4M8 14.5h3"/>',
@@ -39,10 +42,27 @@ const PLACES = [
     about:'Serving Hurley for more than 70 years: everyday groceries and essentials, a caf\u00e9, and a Post Office counter.',
     hours:'Open daily until 6pm \u00b7 Post Office counter Tue & Thu 9.30am\u201312pm',
     phone:'', web:'', address:'High Street, Hurley', map:'Hurley Village Shop, High Street, Hurley'},
-  {id:'riverside', name:'Hurley Riverside Park', type:'venue', kind:'Holiday park by the Thames',
+  // Home tile 6: three big buttons, each opening its own page
+  {id:'stay', name:'Where to stay in Hurley', type:'list', intro:'Hotels, an ancient inn and riverside holiday parks.',
+    links:[{id:'holidays', t:'Holidays and short stays', d:'Hotels and holiday parks to book for a night or a week'},
+           {id:'riverside', t:'Hurley Riverside Park', d:'Holiday park by the Thames: touring, tents and holiday homes'},
+           {id:'hurleyford', t:'Hurleyford Farm Caravan Park', d:'Child-free park of holiday homes on Mill Lane'}]},
+  {id:'riverside', name:'Hurley Riverside Park', type:'venue', kind:'Holiday park by the Thames', hidden:true, parent:'stay',
     about:'Family-run holiday park beside the River Thames between Henley and Marlow: touring pitches for caravans, motorhomes and tents, plus holiday homes, a park shop and riverside walks.',
     hours:'Reception 8am\u20137.30pm \u00b7 Park shop 8.15am\u20137.30pm \u00b7 Touring season roughly March to October',
     phone:'01628 824493', web:'https://www.hurleyriversidepark.co.uk/', address:'Hurley, Maidenhead SL6 5NE', map:'Hurley Riverside Park, Hurley SL6 5NE'},
+  {id:'holidays', name:'Holidays and short stays', type:'list', hidden:true, parent:'stay',
+    intro:'Places to book a night or a week in Hurley.',
+    items:[{t:'The Olde Bell', d:'Historic inn \u00b7 High Street', b:'Boutique rooms in an inn dating back to 1135, with a restaurant and Garden Bar. 01628 969790',
+            u:'https://www.theoldebell.co.uk/', ut:'Book a room'},
+           {t:'Hurley House Hotel', d:'Boutique hotel \u00b7 Henley Road', b:'Ten bedroom suites with a restaurant, bar and garden pavilion. 01628 568500',
+            u:'https://www.hurleyhouse.co.uk/', ut:'Book a room'},
+           {t:'Hurley Riverside Park', d:'Holiday park \u00b7 by the Thames', b:'Touring pitches for caravans, motorhomes and tents, plus holiday homes, roughly March to October. 01628 824493',
+            u:'place.html?p=riverside', ut:'More about the park', own:true}]},
+  {id:'hurleyford', name:'Hurleyford Farm Caravan Park', type:'venue', kind:'Child-free holiday home park', hidden:true, parent:'stay',
+    about:'A family-run park of privately owned holiday homes on the south bank of the Thames, run by the Burfitt family for over 90 years. Child-free, set in mature parkland with its own wildlife. Four-star Visit England rated.',
+    hours:'Holiday homes open 1 March to 31 January', hoursLabel:'Season',
+    phone:'01628 829009', web:'https://www.hurleyfordfarm.co.uk/', address:'Mill Lane, Hurley SL6 5ND', map:'Hurleyford Farm Caravan Park, Mill Lane, Hurley SL6 5ND'},
   {id:'info', name:'Useful info & trusted tradespeople', type:'list', intro:'Handy numbers, links and contacts for Hurley.',
     links:[{id:'trades', t:'Trusted Tradespeople', d:'Recommended by Hurley residents and Riverside Park owners'}],
     // u = link, ut = link text

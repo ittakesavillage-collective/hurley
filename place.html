@@ -59,7 +59,7 @@ if (p.type === 'venue') {
   $('main').innerHTML = hero(p.kind)
     + '<section class="card"><p>' + val(p.about) + '</p></section>'
     + '<section class="card"><dl class="facts">'
-    +   (p.hours ? '<dt>Opening hours</dt><dd>' + val(p.hours) + '</dd>' : '')
+    +   (p.hours ? '<dt>' + (p.hoursLabel || 'Opening hours') + '</dt><dd>' + val(p.hours) + '</dd>' : '')
     +   (p.phone ? '<dt>Phone</dt><dd>' + val(p.phone) + '</dd>' : '')
     +   (p.address ? '<dt>Address</dt><dd>' + esc(p.address) + '</dd>' : '')
     + '</dl></section>'
@@ -72,9 +72,9 @@ if (p.type === 'venue') {
 } else if (p.type === 'list') {
   $('main').innerHTML = hero(p.intro)
     + (p.links || []).map(l => '<a class="linkcard" href="place.html?p=' + l.id + '"><span class="ic">' + svg(l.id) + '</span><span><b>' + esc(l.t) + '</b><small>' + esc(l.d) + '</small></span><span class="chev">\u203a</span></a>').join('')
-    + '<section class="card">' + p.items.map(i =>
+    + (p.items ? '<section class="card">' + p.items.map(i =>
       '<div class="item"><b>' + val(i.t) + '</b>' + (i.d ? '<small>' + val(i.d) + '</small>' : '') + '<span>' + val(i.b) + '</span>'
-      + (i.u ? '<a target="_blank" rel="noopener" href="' + esc(i.u) + '">' + esc(i.ut || 'More') + ' \u203a</a>' : '') + '</div>').join('') + '</section>';
+      + (i.u ? '<a' + (i.own ? '' : ' target="_blank" rel="noopener"') + ' href="' + esc(i.u) + '">' + esc(i.ut || 'More') + ' \u203a</a>' : '') + '</div>').join('') + '</section>' : '');
 
 } else if (p.type === 'news') {
   renderNews($('main'), hero, esc);
