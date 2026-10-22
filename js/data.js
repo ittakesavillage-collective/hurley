@@ -1,6 +1,9 @@
 // Hurley app content. Venue/info details researched 2026-10-22 from official sites, CAMRA and council
 // listings: check on the ground and correct here.
-const VERSION = '0.9.1';
+const VERSION = '0.9.2';
+
+// RULE (Michael, 2026-10-22): accommodation listings get NO links, phone numbers or call buttons until
+// commercial terms are agreed with each venue, one by one. Venue pages use noContact:true.
 
 // Who you are in Hurley: one is required (with a name) before posting or suggesting
 const ROLES = ['Resident', 'Visitor', 'Work in Village', 'HRP Owner'];
@@ -50,19 +53,19 @@ const PLACES = [
   {id:'riverside', name:'Hurley Riverside Park', type:'venue', kind:'Holiday park by the Thames', hidden:true, parent:'stay',
     about:'Family-run holiday park beside the River Thames between Henley and Marlow: touring pitches for caravans, motorhomes and tents, plus holiday homes, a park shop and riverside walks.',
     hours:'Reception 8am\u20137.30pm \u00b7 Park shop 8.15am\u20137.30pm \u00b7 Touring season roughly March to October',
-    phone:'01628 824493', web:'https://www.hurleyriversidepark.co.uk/', address:'Hurley, Maidenhead SL6 5NE', map:'Hurley Riverside Park, Hurley SL6 5NE'},
+    noContact:true, address:'Hurley, Maidenhead SL6 5NE'},
   {id:'holidays', name:'Holidays and short stays', type:'list', hidden:true, parent:'stay',
     intro:'Places to book a night or a week in Hurley.',
-    items:[{t:'The Olde Bell', d:'Historic inn \u00b7 High Street', b:'Boutique rooms in an inn dating back to 1135, with a restaurant and Garden Bar. 01628 969790',
-            u:'https://www.theoldebell.co.uk/', ut:'Book a room'},
-           {t:'Hurley House Hotel', d:'Boutique hotel \u00b7 Henley Road', b:'Ten bedroom suites with a restaurant, bar and garden pavilion. 01628 568500',
-            u:'https://www.hurleyhouse.co.uk/', ut:'Book a room'},
-           {t:'Hurley Riverside Park', d:'Holiday park \u00b7 by the Thames', b:'Touring pitches for caravans, motorhomes and tents, plus holiday homes, roughly March to October. 01628 824493',
+    items:[{t:'The Olde Bell', d:'Historic inn \u00b7 High Street', b:'Boutique rooms in an inn dating back to 1135, with a restaurant and Garden Bar.'},
+           {t:'Gable End Annexe', d:'Self-catering annexe \u00b7 sleeps 2', b:'A stylish one-bedroom annexe with a kitchen, patio and balcony. Free private parking, an EV charger and free WiFi.'},
+           {t:'The Fox: Country Rooms', d:'Guest rooms', b:'Luxurious country rooms in Hurley, handy for Windsor Castle and Legoland Windsor (about 11 miles).'},
+           {t:'Hurley House Hotel', d:'Boutique hotel \u00b7 Henley Road', b:'Ten bedroom suites with a restaurant, bar and garden pavilion.'},
+           {t:'Hurley Riverside Park', d:'Holiday park \u00b7 by the Thames', b:'Touring pitches for caravans, motorhomes and tents, plus holiday homes, roughly March to October.',
             u:'place.html?p=riverside', ut:'More about the park', own:true}]},
   {id:'hurleyford', name:'Hurleyford Farm Caravan Park', type:'venue', kind:'Child-free holiday home park', hidden:true, parent:'stay',
     about:'A family-run park of privately owned holiday homes on the south bank of the Thames, run by the Burfitt family for over 90 years. Child-free, set in mature parkland with its own wildlife. Four-star Visit England rated.',
     hours:'Holiday homes open 1 March to 31 January', hoursLabel:'Season',
-    phone:'01628 829009', web:'https://www.hurleyfordfarm.co.uk/', address:'Mill Lane, Hurley SL6 5ND', map:'Hurleyford Farm Caravan Park, Mill Lane, Hurley SL6 5ND'},
+    noContact:true, address:'Mill Lane, Hurley SL6 5ND'},
   {id:'info', name:'Useful info & trusted tradespeople', type:'list', intro:'Handy numbers, links and contacts for Hurley.',
     links:[{id:'trades', t:'Trusted Tradespeople', d:'Recommended by Hurley residents and Riverside Park owners'}],
     // u = link, ut = link text

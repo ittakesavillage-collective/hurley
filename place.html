@@ -55,19 +55,19 @@ const OOPS = '<p class="note">Couldn’t reach Hurley’s noticeboard. Check you
 const errText = e => /Too many/.test(e && e.message) ? 'You already have 5 things waiting for approval. Please wait for those to be checked.' : 'Sorry, that didn’t send. Check your signal and try again.';
 
 if (p.type === 'venue') {
-  const tel = /^[0-9 +]+$/.test(p.phone) ? p.phone.replace(/\s/g, '') : '';
+  const tel = !p.noContact && /^[0-9 +]+$/.test(p.phone) ? p.phone.replace(/\s/g, '') : '';
   $('main').innerHTML = hero(p.kind)
     + '<section class="card"><p>' + val(p.about) + '</p></section>'
     + '<section class="card"><dl class="facts">'
     +   (p.hours ? '<dt>' + (p.hoursLabel || 'Opening hours') + '</dt><dd>' + val(p.hours) + '</dd>' : '')
-    +   (p.phone ? '<dt>Phone</dt><dd>' + val(p.phone) + '</dd>' : '')
+    +   (p.phone && !p.noContact ? '<dt>Phone</dt><dd>' + val(p.phone) + '</dd>' : '')
     +   (p.address ? '<dt>Address</dt><dd>' + esc(p.address) + '</dd>' : '')
     + '</dl></section>'
-    + '<div class="btns">'
+    + (p.noContact ? '' : '<div class="btns">'
     +   (tel ? '<a class="btn" href="tel:' + tel + '">Call</a>' : '')
     +   '<a class="btn ghost" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(p.map) + '">Map</a>'
     +   (p.web ? '<a class="btn ghost" target="_blank" rel="noopener" href="' + esc(p.web) + '">Website</a>' : '')
-    + '</div>';
+    + '</div>');
 
 } else if (p.type === 'list') {
   $('main').innerHTML = hero(p.intro)
