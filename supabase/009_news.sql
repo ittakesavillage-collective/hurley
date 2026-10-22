@@ -1,0 +1,3 @@
+-- Applied 2026-10-22 via the Supabase connector.
+-- public.news (village, title, body, link, created_at): everyone reads; admins insert/update/delete
+-- (policy "admins write news" uses is_admin()). Seeded with a "Welcome to the Hurley app" post.

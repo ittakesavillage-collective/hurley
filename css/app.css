@@ -132,3 +132,11 @@ input,textarea,select{font-size:max(16px,1em)}
 form{scroll-margin-top:76px}
 
 .ib.admin .badge{position:absolute;top:2px;right:0;min-width:20px;height:20px;padding:0 5px;border-radius:999px;background:#D32F2F;color:#fff;font-size:12px;font-weight:700;line-height:20px;text-align:center}
+
+/* News */
+.news{gap:6px}
+.btn.danger{background:none;color:var(--terra-ink);border:1.5px solid var(--terra)}
+label.tick{display:flex;align-items:center;gap:10px;font-weight:500}
+label.tick input{width:22px;height:22px;accent-color:var(--sage)}
+.linkcard.ghostcard{background:var(--surface);color:var(--ink);border:1px solid var(--line)}
+.item a{font-weight:600;align-self:flex-start;margin-top:2px}

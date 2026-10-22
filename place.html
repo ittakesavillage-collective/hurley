@@ -26,6 +26,7 @@
 <script src="js/db.js"></script>
 <script src="js/trades.js"></script>
 <script src="js/diary.js"></script>
+<script src="js/news.js"></script>
 <script>
 const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 // Placeholder text (starts with xxx) shows greyed out
@@ -57,9 +58,13 @@ if (p.type === 'venue') {
   const tel = /^[0-9 +]+$/.test(p.phone) ? p.phone.replace(/\s/g, '') : '';
   $('main').innerHTML = hero(p.kind)
     + '<section class="card"><p>' + val(p.about) + '</p></section>'
-    + '<section class="card"><dl class="facts"><dt>Opening hours</dt><dd>' + val(p.hours) + '</dd><dt>Phone</dt><dd>' + val(p.phone) + '</dd></dl></section>'
+    + '<section class="card"><dl class="facts">'
+    +   (p.hours ? '<dt>Opening hours</dt><dd>' + val(p.hours) + '</dd>' : '')
+    +   (p.phone ? '<dt>Phone</dt><dd>' + val(p.phone) + '</dd>' : '')
+    +   (p.address ? '<dt>Address</dt><dd>' + esc(p.address) + '</dd>' : '')
+    + '</dl></section>'
     + '<div class="btns">'
-    +   '<a class="btn" ' + (tel ? 'href="tel:' + tel + '"' : 'aria-disabled="true"') + '>Call</a>'
+    +   (tel ? '<a class="btn" href="tel:' + tel + '">Call</a>' : '')
     +   '<a class="btn ghost" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(p.map) + '">Map</a>'
     +   (p.web ? '<a class="btn ghost" target="_blank" rel="noopener" href="' + esc(p.web) + '">Website</a>' : '')
     + '</div>';
@@ -68,7 +73,11 @@ if (p.type === 'venue') {
   $('main').innerHTML = hero(p.intro)
     + (p.links || []).map(l => '<a class="linkcard" href="place.html?p=' + l.id + '"><span class="ic">' + svg(l.id) + '</span><span><b>' + esc(l.t) + '</b><small>' + esc(l.d) + '</small></span><span class="chev">\u203a</span></a>').join('')
     + '<section class="card">' + p.items.map(i =>
-      '<div class="item"><b>' + val(i.t) + '</b>' + (i.d ? '<small>' + val(i.d) + '</small>' : '') + '<span>' + val(i.b) + '</span></div>').join('') + '</section>';
+      '<div class="item"><b>' + val(i.t) + '</b>' + (i.d ? '<small>' + val(i.d) + '</small>' : '') + '<span>' + val(i.b) + '</span>'
+      + (i.u ? '<a target="_blank" rel="noopener" href="' + esc(i.u) + '">' + esc(i.ut || 'More') + ' \u203a</a>' : '') + '</div>').join('') + '</section>';
+
+} else if (p.type === 'news') {
+  renderNews($('main'), hero, esc);
 
 } else if (p.type === 'diary') {
   renderDiary($('main'), hero, esc);
