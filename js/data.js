@@ -1,6 +1,6 @@
 // Hurley app content. Venue/info details researched 2026-10-22 from official sites, CAMRA and council
 // listings: check on the ground and correct here.
-const VERSION = '0.9.4';
+const VERSION = '0.9.5';
 
 // RULE (Michael, 2026-10-22): accommodation listings get NO links, phone numbers or call buttons until
 // commercial terms are agreed with each venue, one by one. Venue pages use noContact:true.
@@ -15,6 +15,7 @@ const ICONS = {
   oldebell:'<path d="M12 3a1.5 1.5 0 0 1 1.5 1.5v.6A6 6 0 0 1 18 11v4l2 2.5H4L6 15v-4a6 6 0 0 1 4.5-5.9v-.6A1.5 1.5 0 0 1 12 3zM10 20.5a2 2 0 0 0 4 0"/>',
   risingsun:'<path d="M3 18h18M6.5 18a5.5 5.5 0 0 1 11 0M12 6.5V9M5.5 9.5l1.6 1.6M18.5 9.5l-1.6 1.6M2.5 14.5h2M19.5 14.5h2"/>',
   shop:'<path d="M4 9h16l-1.5-4h-13zM5 9v11h14V9M9.5 20v-6h5v6"/>',
+  church:'<path d="M12 2.5v4M10 4.5h4M7 21V11l5-4.5 5 4.5v10M4 21h16M10.5 21v-4a1.5 1.5 0 0 1 3 0v4"/>',
   stay:'<path d="M3 11l9-7 9 7M5 9.5V20h14V9.5"/><path d="M8.5 20v-4.5a1 1 0 0 1 1-1h5a1 1 0 0 1 1 1V20M8.5 15.5h7"/>',
   holidays:'<path d="M4 8h16v11H4zM9 8V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V8M4 13h16"/>',
   hurleyford:'<path d="M3 7h13a3 3 0 0 1 3 3v6H3zM19 13h2.5M7 16v2.5M12 16v2.5M6 10h3v3H6zM12 10h3v3h-3z"/>',
@@ -54,6 +55,15 @@ const PLACES = [
     about:'Family-run holiday park beside the River Thames between Henley and Marlow: touring pitches for caravans, motorhomes and tents, plus holiday homes, a park shop and riverside walks.',
     hours:'Reception 8am\u20137.30pm \u00b7 Park shop 8.15am\u20137.30pm \u00b7 Touring season roughly March to October',
     noContact:true, address:'Hurley, Maidenhead SL6 5NE'},
+  // Reached from Useful Info. Source: burchettsgreenparish.org/hurley + its ChurchSuite calendar (2026-10-22)
+  {id:'church', name:'St Mary the Virgin', type:'list', hidden:true, parent:'info',
+    intro:'Hurley\u2019s parish church, by the river at the end of the High Street.',
+    items:[{t:'Visiting', b:'The church is open every day, 8am\u20134pm. St Mary the Virgin, Hurley SL6 5NB.'},
+           {t:'Sunday services', b:'Every Sunday at 10.30am (except fifth Sundays). First Sunday: God Through Music. Third Sunday: God in Quiet. Second and fourth Sundays: Holy Communion.',
+            u:'place.html?p=diary', ut:'See the dates in the Diary', own:true},
+           {t:'A thousand years of history', b:'There has probably been a church here since about 700 AD. In 1086 the rebuilt church was dedicated as a Benedictine priory, a cell of Westminster Abbey. After the Dissolution in 1536 its eastern end was pulled down and the stone reused for Ladye Place. The bell turret and largest bell date from around 1600, the east end was rebuilt in 1852, and the Priory Room was added in 1987.'},
+           {t:'Parish of Burchetts Green', b:'St Mary\u2019s is one of three churches in the parish, with St James\u2019s, Stubbings and St John\u2019s, Littlewick Green. Parish office 01628 820077 \u00b7 office@burchettsgreenparish.org (Mon, Tue & Thu 9.30\u201311.30am) for baptisms, weddings, funerals and general enquiries.',
+            u:'https://www.burchettsgreenparish.org/hurley', ut:'Parish website'}]},
   {id:'holidays', name:'Holidays and short stays', type:'list', hidden:true, parent:'stay',
     intro:'Places to book a night or a week in Hurley.',
     items:[{t:'The Olde Bell', d:'Historic inn \u00b7 High Street', b:'Boutique rooms in an inn dating back to 1135, with a restaurant and Garden Bar.'},
@@ -67,7 +77,8 @@ const PLACES = [
     hours:'Holiday homes open 1 March to 31 January', hoursLabel:'Season',
     noContact:true, address:'Mill Lane, Hurley SL6 5ND'},
   {id:'info', name:'Useful info & trusted tradespeople', type:'list', intro:'Handy numbers, links and contacts for Hurley.',
-    links:[{id:'trades', t:'Trusted Tradespeople', d:'Recommended by Hurley residents and Riverside Park owners'}],
+    links:[{id:'trades', t:'Trusted Tradespeople', d:'Recommended by Hurley residents and Riverside Park owners'},
+           {id:'church', t:'St Mary the Virgin', d:'Hurley\u2019s parish church: services, visiting and history'}],
     // u = link, ut = link text
     items:[{t:'Bin collections', b:'Thursdays: recycling every week, rubbish every other week. They’re in the Diary, and you’ll get a reminder at 7pm the night before if notifications are on. Days can differ by street, so check your own address.',
             u:'https://www.rbwm.gov.uk/environment-and-waste/recycling-and-rubbish/find-your-bin-collection-day', ut:'Find your bin day'},
@@ -77,8 +88,6 @@ const PLACES = [
             u:'https://www.nhs.uk/service-search/find-a-gp', ut:'Find a GP'},
            {t:'Parish council', b:'Hurley Parish Council meets on the third Thursday of each month. Clerk: clerk@hurleyparish.org.uk \u00b7 07799 302998',
             u:'https://hurleyparish.org.uk/', ut:'hurleyparish.org.uk'},
-           {t:'Church', b:'St Mary the Virgin, by the river at the end of the High Street: once a Benedictine priory, now the parish church. Part of the Parish of Burchetts Green. Parish office 01628 820077.',
-            u:'https://www.burchettsgreenparish.org/services', ut:'Service times'},
            {t:'Emergencies', b:'999 \u00b7 non-emergency police 101 \u00b7 NHS 111'}]},
   {id:'yourway', name:'Your App, your way', type:'yourway'},
   // Not on the home grid: reached from Useful Info
