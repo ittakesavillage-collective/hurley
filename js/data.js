@@ -1,6 +1,6 @@
 // Hurley app content. Venue/info details researched 2026-10-22 from official sites, CAMRA and council
 // listings: check on the ground and correct here.
-const VERSION = '0.9.3';
+const VERSION = '0.9.4';
 
 // RULE (Michael, 2026-10-22): accommodation listings get NO links, phone numbers or call buttons until
 // commercial terms are agreed with each venue, one by one. Venue pages use noContact:true.
@@ -40,7 +40,7 @@ const PLACES = [
   {id:'risingsun', name:'Rising Sun', type:'venue', kind:'Village pub',
     about:'Hurley\u2019s village pub on the High Street, reopened under new management in January 2026 and open seven days a week.',
     hours:'Mon\u2013Thu & Sun 12\u201310pm \u00b7 Fri & Sat 12\u201311pm',
-    phone:'01628 769192', web:'', address:'High Street, Hurley SL6 5LT', map:'Rising Sun, High Street, Hurley SL6 5LT'},
+    noContact:true, address:'High Street, Hurley SL6 5LT'},
   {id:'shop', name:'Village Shop', type:'venue', kind:'Shop, caf\u00e9 & Post Office',
     about:'Serving Hurley for more than 70 years: everyday groceries and essentials, a caf\u00e9, and a Post Office counter.',
     hours:'Open daily until 6pm \u00b7 Post Office counter Tue & Thu 9.30am\u201312pm',
@@ -69,7 +69,7 @@ const PLACES = [
   {id:'info', name:'Useful info & trusted tradespeople', type:'list', intro:'Handy numbers, links and contacts for Hurley.',
     links:[{id:'trades', t:'Trusted Tradespeople', d:'Recommended by Hurley residents and Riverside Park owners'}],
     // u = link, ut = link text
-    items:[{t:'Bin collections', b:'Bins are collected by the Royal Borough of Windsor & Maidenhead. Enter your postcode to see your days for rubbish, recycling, food and garden waste.',
+    items:[{t:'Bin collections', b:'Thursdays: recycling every week, rubbish every other week. They’re in the Diary, and you’ll get a reminder at 7pm the night before if notifications are on. Days can differ by street, so check your own address.',
             u:'https://www.rbwm.gov.uk/environment-and-waste/recycling-and-rubbish/find-your-bin-collection-day', ut:'Find your bin day'},
            {t:'Bus times', b:'Route 228 (Thames Valley) Maidenhead \u2013 Hurley \u2013 Henley, Monday to Saturday, about four or five buses a day each way. Stops at Shepherds Close and Hurley Riverside Park. No Sunday service.',
             u:'https://bustimes.org/services/228-maidenhead-henley-via-hurley', ut:'Live timetable'},
