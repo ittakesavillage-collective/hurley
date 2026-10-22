@@ -1,0 +1,6 @@
+-- Applied 2026-10-22 via the Supabase connector. Same as Willian's properties digest.
+-- digests (village 'hurley', kind properties|news, draft/live/rejected/archived; RLS: live readable, admin all),
+-- digest_config (kind -> domains[], max_searches; admin only), digest_runs (day, kind) once-per-Friday guard.
+-- pg_cron 'weekly-digest-friday' 0 18,19 * * 5 -> functions/v1/weekly-digest {cron:true} (acts only Fri 7pm London).
+-- Seed domains: savills.com knightfrank.co.uk hamptons.co.uk struttandparker.com philipboothesq.com
+-- fineandcountry.co.uk barkerstone.co.uk moveli.co.uk emoov.co.uk (max_searches 12).

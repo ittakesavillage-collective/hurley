@@ -27,6 +27,7 @@
 <script src="js/trades.js"></script>
 <script src="js/diary.js"></script>
 <script src="js/news.js"></script>
+<script src="js/digest.js"></script>
 <script>
 const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 // Placeholder text (starts with xxx) shows greyed out
@@ -75,6 +76,9 @@ if (p.type === 'venue') {
     + (p.items ? '<section class="card">' + p.items.map(i =>
       '<div class="item"><b>' + val(i.t) + '</b>' + (i.d ? '<small>' + val(i.d) + '</small>' : '') + '<span>' + val(i.b) + '</span>'
       + (i.u ? '<a' + (i.own ? '' : ' target="_blank" rel="noopener"') + ' href="' + esc(i.u) + '">' + esc(i.ut || 'More') + ' \u203a</a>' : '') + '</div>').join('') + '</section>' : '');
+
+} else if (p.type === 'digest') {
+  renderDigest($('main'), hero, esc, p.kind, p.intro, p.empty);
 
 } else if (p.type === 'news') {
   renderNews($('main'), hero, esc);

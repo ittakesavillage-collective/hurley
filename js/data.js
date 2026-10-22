@@ -1,6 +1,6 @@
 // Hurley app content. Venue/info details researched 2026-10-22 from official sites, CAMRA and council
 // listings: check on the ground and correct here.
-const VERSION = '0.9.6';
+const VERSION = '0.10.0';
 
 // RULE (Michael, 2026-10-22): accommodation listings get NO links, phone numbers or call buttons until
 // commercial terms are agreed with each venue, one by one. Venue pages use noContact:true.
@@ -20,6 +20,7 @@ const ICONS = {
   holidays:'<path d="M4 8h16v11H4zM9 8V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V8M4 13h16"/>',
   hurleyford:'<path d="M3 7h13a3 3 0 0 1 3 3v6H3zM19 13h2.5M7 16v2.5M12 16v2.5M6 10h3v3H6zM12 10h3v3h-3z"/>',
   riverside:'<path d="M3 19l7-13 7 13zM10 6v13M2 22c2-1.3 4-1.3 6 0s4 1.3 6 0 4-1.3 6 0"/>',
+  property:'<path d="M3 11l9-7 9 7M5 9.5V20h14V9.5"/><path d="M10 20v-5h4v5"/><path d="M15.5 4.5h3v4"/>',
   info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/>',
   diary:'<path d="M4 6h16v14H4zM4 10.5h16M8 3.5v4M16 3.5v4M8 14.5h3"/>',
   trades:'<path d="M14.7 6.3a4 4 0 0 0-5.4 5.2L3.6 17.2a1.9 1.9 0 0 0 2.7 2.7l5.7-5.7a4 4 0 0 0 5.2-5.4l-2.6 2.6-2.3-.5-.5-2.3z"/>',
@@ -91,6 +92,10 @@ const PLACES = [
            {t:'Village Hall & Village Association', b:'Hurley Village Hall, High Street SL6 5LT. The Hurley Village Association runs the hall and village events: chair@hurleyvillage.co.uk · 07901 297223',
             u:'https://www.hurleyvillage.co.uk/', ut:'hurleyvillage.co.uk'},
            {t:'Emergencies', b:'999 \u00b7 non-emergency police 101 \u00b7 NHS 111'}]},
+  // Properties for sale: weekly AI draft from the agents' own websites, approved by the admin before it shows.
+  // Info-only for now; a paid listing tier (agents / sellers) is the monetising plan. Same as Willian.
+  {id:'property', name:'Properties for sale', type:'digest', kind:'properties', intro:'Homes for sale in Hurley, updated weekly.',
+    empty:'No homes listed this week. Check back soon.'},
   {id:'yourway', name:'Your App, your way', type:'yourway'},
   // Not on the home grid: reached from Useful Info
   {id:'trades', name:'Trusted Tradespeople', type:'trades', hidden:true, parent:'info'}
