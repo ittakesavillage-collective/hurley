@@ -1,6 +1,6 @@
 // Hurley app content. Venue/info details researched 2026-10-22 from official sites, CAMRA and council
 // listings: check on the ground and correct here.
-const VERSION = '0.9.2';
+const VERSION = '0.9.3';
 
 // RULE (Michael, 2026-10-22): accommodation listings get NO links, phone numbers or call buttons until
 // commercial terms are agreed with each venue, one by one. Venue pages use noContact:true.
@@ -35,8 +35,8 @@ const PLACES = [
   {id:'diary', name:'Diary', type:'diary'},
   {id:'oldebell', name:'Olde Bell', type:'venue', kind:'Historic inn: restaurant, Garden Bar & rooms',
     about:'Dating back to 1135 and often called one of the oldest inns in the world. Restaurant, Garden Bar and boutique rooms on the High Street.',
-    hours:'Open daily. Call or see the website for restaurant and bar times.',
-    phone:'01628 969790', web:'https://www.theoldebell.co.uk/', address:'High Street, Hurley SL6 5LX', map:'The Olde Bell, High Street, Hurley SL6 5LX'},
+    hours:'Open daily',
+    noContact:true, address:'High Street, Hurley SL6 5LX'},
   {id:'risingsun', name:'Rising Sun', type:'venue', kind:'Village pub',
     about:'Hurley\u2019s village pub on the High Street, reopened under new management in January 2026 and open seven days a week.',
     hours:'Mon\u2013Thu & Sun 12\u201310pm \u00b7 Fri & Sat 12\u201311pm',
