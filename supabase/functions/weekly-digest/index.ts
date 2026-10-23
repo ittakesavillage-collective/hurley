@@ -41,6 +41,12 @@ Deno.serve(async (req) => {
   const b = await req.json().catch(() => ({}));
   const kind = "properties";
 
+  // Key check: {ping:true} asks Anthropic for its model list (free) and reports only whether the key works.
+  if (b.ping) {
+    const r = await fetch("https://api.anthropic.com/v1/models?limit=1", { headers: { "x-api-key": apiKey, "anthropic-version": "2023-06-01" } });
+    return json(r.ok ? { key: "ok" } : { key: "rejected", status: r.status });
+  }
+
   if (b.cron) {
     // Fridays only, and only the run that is 7pm in London; one run per day
     const p = new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/London", weekday: "short", hour: "2-digit", hourCycle: "h23", year: "numeric", month: "2-digit", day: "2-digit" })
