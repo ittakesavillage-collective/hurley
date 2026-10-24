@@ -1,6 +1,6 @@
 // Hurley app content. Venue/info details researched 2026-10-22 from official sites, CAMRA and council
 // listings: check on the ground and correct here.
-const VERSION = '0.10.0';
+const VERSION = '0.10.1';
 
 // RULE (Michael, 2026-10-22): accommodation listings get NO links, phone numbers or call buttons until
 // commercial terms are agreed with each venue, one by one. Venue pages use noContact:true.
