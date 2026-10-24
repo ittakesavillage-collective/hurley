@@ -28,7 +28,7 @@ Rules:
 - Leave out anything sold, let or sold subject to contract. Say "under offer" if a listing is under offer.
 - Plain text only: no markdown, no links, no photos, no marketing language, no opinions.
 - One property per line, exactly in this form: Street or property name - guide price or price - N bed property type - Listed by Agent name
-- Maximum 8 lines. If there are no current properties, write exactly: No properties found this week.
+- Maximum 12 lines. If there are no current properties, write exactly: No properties found this week.
 - Output only the lines, nothing before or after.`;
 
 Deno.serve(async (req) => {
