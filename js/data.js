@@ -1,6 +1,6 @@
 // Hurley app content. Venue/info details researched 2026-10-22 from official sites, CAMRA and council
 // listings: check on the ground and correct here.
-const VERSION = '0.10.2';
+const VERSION = '0.10.3';
 
 // RULE (Michael, 2026-10-22): accommodation listings get NO links, phone numbers or call buttons until
 // commercial terms are agreed with each venue, one by one. Venue pages use noContact:true.
@@ -82,7 +82,14 @@ const PLACES = [
     links:[{id:'hurleyfordvans', icon:'vans', t:'Caravans for Sale', d:'Holiday homes for sale at Hurleyford Farm'}], listUs:true},
   // Caravans for sale at each park: empty until owners ask to be listed (paid listings later)
   {id:'riversidevans', name:'Caravans for Sale', icon:'vans', type:'list', hidden:true, parent:'riverside', listUs:true,
-    intro:'Holiday homes for sale at Hurley Riverside Park.', items:[], empty:'No caravans listed at the moment.'},
+    intro:'Holiday homes for sale at Hurley Riverside Park.', empty:'No caravans listed at the moment.',
+    // Selected vans only (Michael chooses; not the park's whole list). Source: the park's sale boards + its website, Nov 2026
+    items:[{t:'2020 Swift Ardennes', d:'£34,000 · Willow Field · Licence until 2045',
+            b:'38ft × 12ft. Open-plan kitchen, diner and lounge. Double bedroom with en-suite, twin bedroom, shower room and a separate WC.'},
+           {t:'2009 ABI Arizona (pitch W47)', d:'£13,000 · Willow Field · Licence until 2033',
+            b:'35ft × 12ft. Open-plan kitchen, diner and lounge. Large double bedroom, twin room and a shower room with basin and WC.'},
+           {t:'2004 Atlas Oasis', d:'£5,500 · Willow Field · Licence until 2028',
+            b:'28ft × 12ft. Open-plan kitchen, diner and lounge. Double bedroom, twin bedroom, shower room with basin and a separate WC.'}]},
   {id:'hurleyfordvans', name:'Caravans for Sale', icon:'vans', type:'list', hidden:true, parent:'hurleyford', listUs:true,
     intro:'Holiday homes for sale at Hurleyford Farm Caravan Park.', items:[], empty:'No caravans listed at the moment.'},
   {id:'info', name:'Useful info & trusted tradespeople', type:'list', intro:'Handy numbers, links and contacts for Hurley.',
