@@ -1,6 +1,6 @@
 // Hurley app content. Venue/info details researched 2026-10-22 from official sites, CAMRA and council
 // listings: check on the ground and correct here.
-const VERSION = '0.10.1';
+const VERSION = '0.10.2';
 
 // RULE (Michael, 2026-10-22): accommodation listings get NO links, phone numbers or call buttons until
 // commercial terms are agreed with each venue, one by one. Venue pages use noContact:true.
@@ -19,6 +19,7 @@ const ICONS = {
   stay:'<path d="M3 11l9-7 9 7M5 9.5V20h14V9.5"/><path d="M8.5 20v-4.5a1 1 0 0 1 1-1h5a1 1 0 0 1 1 1V20M8.5 15.5h7"/>',
   holidays:'<path d="M4 8h16v11H4zM9 8V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V8M4 13h16"/>',
   hurleyford:'<path d="M3 7h13a3 3 0 0 1 3 3v6H3zM19 13h2.5M7 16v2.5M12 16v2.5M6 10h3v3H6zM12 10h3v3h-3z"/>',
+  vans:'<path d="M3 7h13a3 3 0 0 1 3 3v6H3zM19 13h2.5M7 16v2.5M12 16v2.5M6 10h3v3H6zM12 10h3v3h-3z"/>',
   riverside:'<path d="M3 19l7-13 7 13zM10 6v13M2 22c2-1.3 4-1.3 6 0s4 1.3 6 0 4-1.3 6 0"/>',
   property:'<path d="M3 11l9-7 9 7M5 9.5V20h14V9.5"/><path d="M10 20v-5h4v5"/><path d="M15.5 4.5h3v4"/>',
   info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/>',
@@ -55,7 +56,8 @@ const PLACES = [
   {id:'riverside', name:'Hurley Riverside Park', type:'venue', kind:'Holiday park by the Thames', hidden:true, parent:'stay',
     about:'Family-run holiday park beside the River Thames between Henley and Marlow: touring pitches for caravans, motorhomes and tents, plus holiday homes, a park shop and riverside walks.',
     hours:'Reception 8am\u20137.30pm \u00b7 Park shop 8.15am\u20137.30pm \u00b7 Touring season roughly March to October',
-    noContact:true, address:'Hurley, Maidenhead SL6 5NE'},
+    noContact:true, address:'Hurley, Maidenhead SL6 5NE',
+    links:[{id:'riversidevans', icon:'vans', t:'Caravans for Sale', d:'Holiday homes for sale at Hurley Riverside Park'}], listUs:true},
   // Reached from Useful Info. Source: burchettsgreenparish.org/hurley + its ChurchSuite calendar (2026-10-22)
   {id:'church', name:'St Mary the Virgin', type:'list', hidden:true, parent:'info',
     intro:'Hurley\u2019s parish church, by the river at the end of the High Street.',
@@ -76,7 +78,13 @@ const PLACES = [
   {id:'hurleyford', name:'Hurleyford Farm Caravan Park', type:'venue', kind:'Child-free holiday home park', hidden:true, parent:'stay',
     about:'A family-run park of privately owned holiday homes on the south bank of the Thames, run by the Burfitt family for over 90 years. Child-free, set in mature parkland with its own wildlife. Four-star Visit England rated.',
     hours:'Holiday homes open 1 March to 31 January', hoursLabel:'Season',
-    noContact:true, address:'Mill Lane, Hurley SL6 5ND'},
+    noContact:true, address:'Mill Lane, Hurley SL6 5ND',
+    links:[{id:'hurleyfordvans', icon:'vans', t:'Caravans for Sale', d:'Holiday homes for sale at Hurleyford Farm'}], listUs:true},
+  // Caravans for sale at each park: empty until owners ask to be listed (paid listings later)
+  {id:'riversidevans', name:'Caravans for Sale', icon:'vans', type:'list', hidden:true, parent:'riverside', listUs:true,
+    intro:'Holiday homes for sale at Hurley Riverside Park.', items:[], empty:'No caravans listed at the moment.'},
+  {id:'hurleyfordvans', name:'Caravans for Sale', icon:'vans', type:'list', hidden:true, parent:'hurleyford', listUs:true,
+    intro:'Holiday homes for sale at Hurleyford Farm Caravan Park.', items:[], empty:'No caravans listed at the moment.'},
   {id:'info', name:'Useful info & trusted tradespeople', type:'list', intro:'Handy numbers, links and contacts for Hurley.',
     links:[{id:'trades', t:'Trusted Tradespeople', d:'Recommended by Hurley residents and Riverside Park owners'},
            {id:'church', t:'St Mary the Virgin', d:'Hurley\u2019s parish church: services, visiting and history'}],

@@ -39,8 +39,12 @@ $('title').textContent = p.name;
 // Sub-pages go back to their parent page, not home
 const par = p.parent && PLACES.find(x => x.id === p.parent);
 if (par) { const b = document.querySelector('.back'); b.href = 'place.html?p=' + par.id; b.innerHTML = '&larr; ' + (par.name.length > 18 ? 'Back' : esc(par.name)); }
-const hero = sub => '<div class="hero"><div class="ic">' + svg(p.id) + '</div><div><h2>' + esc(p.name) + '</h2>'
+const hero = sub => '<div class="hero"><div class="ic">' + svg(p.icon || p.id) + '</div><div><h2>' + esc(p.name) + '</h2>'
   + (sub ? '<p class="muted">' + esc(sub) + '</p>' : '') + '</div></div>';
+const linkcards = () => (p.links || []).map(l => '<a class="linkcard" href="place.html?p=' + l.id + '"><span class="ic">' + svg(l.icon || l.id) + '</span><span><b>' + esc(l.t) + '</b><small>' + esc(l.d) + '</small></span><span class="chev">\u203a</span></a>').join('');
+// Caravans for Sale: owners email the collective to be listed
+const parkName = () => { let q = p; while (q && q.type !== 'venue') q = PLACES.find(x => x.id === q.parent); return q ? q.name : 'Hurley'; };
+const listUs = () => p.listUs ? '<p class="note listus"><em>Please <a href="mailto:broadfords@gmail.com?subject=' + encodeURIComponent('Caravan for sale: ' + parkName()) + '&body=' + encodeURIComponent('I would like to list my caravan at ' + parkName() + '. Details: ') + '">Contact Us</a> to get your van listed</em></p>' : '';
 // No posting until the profile has a name and a role
 const gate = () => '<section class="card" id="gate"><b>First, tell us who you are</b>'
   + '<p>To post or suggest an idea we need your name, and whether you’re a resident, a visitor, work in the village or own at Hurley Riverside Park.</p>'
@@ -64,6 +68,7 @@ if (p.type === 'venue') {
     +   (p.phone && !p.noContact ? '<dt>Phone</dt><dd>' + val(p.phone) + '</dd>' : '')
     +   (p.address ? '<dt>Address</dt><dd>' + esc(p.address) + '</dd>' : '')
     + '</dl></section>'
+    + linkcards() + listUs()
     + (p.noContact ? '' : '<div class="btns">'
     +   (tel ? '<a class="btn" href="tel:' + tel + '">Call</a>' : '')
     +   '<a class="btn ghost" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(p.map) + '">Map</a>'
@@ -71,11 +76,11 @@ if (p.type === 'venue') {
     + '</div>');
 
 } else if (p.type === 'list') {
-  $('main').innerHTML = hero(p.intro)
-    + (p.links || []).map(l => '<a class="linkcard" href="place.html?p=' + l.id + '"><span class="ic">' + svg(l.id) + '</span><span><b>' + esc(l.t) + '</b><small>' + esc(l.d) + '</small></span><span class="chev">\u203a</span></a>').join('')
-    + (p.items ? '<section class="card">' + p.items.map(i =>
+  $('main').innerHTML = hero(p.intro) + linkcards()
+    + (p.items && !p.items.length && p.empty ? '<section class="card"><p class="note">' + esc(p.empty) + '</p></section>' : '')
+    + (p.items && p.items.length ? '<section class="card">' + p.items.map(i =>
       '<div class="item"><b>' + val(i.t) + '</b>' + (i.d ? '<small>' + val(i.d) + '</small>' : '') + '<span>' + val(i.b) + '</span>'
-      + (i.u ? '<a' + (i.own ? '' : ' target="_blank" rel="noopener"') + ' href="' + esc(i.u) + '">' + esc(i.ut || 'More') + ' \u203a</a>' : '') + '</div>').join('') + '</section>' : '');
+      + (i.u ? '<a' + (i.own ? '' : ' target="_blank" rel="noopener"') + ' href="' + esc(i.u) + '">' + esc(i.ut || 'More') + ' \u203a</a>' : '') + '</div>').join('') + '</section>' : '') + listUs();
 
 } else if (p.type === 'digest') {
   renderDigest($('main'), hero, esc, p.kind, p.intro, p.empty);
