@@ -145,3 +145,6 @@ create table if not exists public.diary (
   starts_on date not null, every_days int check (every_days between 1 and 366), ends_on date,
   alert_eve boolean not null default false, created_at timestamptz not null default now());
 -- RLS: everyone signed in reads; admin writes. diary_sent: service role only. cron job 'diary-eve-alert' -> send-push {"diary":true}.
+
+-- ---------- Installs (v0.10.4): same as Willian: one row per phone that has opened the app from its home screen ----------
+-- Table public.installs(user_id pk, village 'hurley', platform, created_at, alerted_at); trigger alert_new_install -> send-push.

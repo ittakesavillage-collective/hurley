@@ -81,8 +81,8 @@ async function sendAll(admin: any, subs: Sub[], msg: { title: string; body: stri
 
 // deno-lint-ignore no-explicit-any
 async function adminAlert(admin: any, table: string, key: string) {
-  const keyCol = table === "profiles" ? "user_id" : "id";
-  if (!["posts", "requests", "profiles", "trades", "digests"].includes(table) || !key) return { skipped: "bad alert" };
+  const keyCol = table === "profiles" || table === "installs" ? "user_id" : "id";
+  if (!["posts", "requests", "profiles", "trades", "digests", "installs"].includes(table) || !key) return { skipped: "bad alert" };
   // Claim the row: only the first call within 10 minutes of creation wins
   const since = new Date(Date.now() - 10 * 60 * 1000).toISOString();
   const { data: row } = await admin.from(table).update({ alerted_at: new Date().toISOString() })
@@ -93,6 +93,13 @@ async function adminAlert(admin: any, table: string, key: string) {
   // The number of things waiting for approval goes on the app icon: the admin's to-do list
   const pending = async (t: string, st: string) => (await admin.from(t).select("id", { count: "exact", head: true }).eq("status", st)).count ?? 0;
   const badge = (await pending("requests", "pending")) + (await pending("posts", "pending")) + (await pending("trades", "pending")) + (await pending("digests", "draft"));
+  // Someone opened the app from their home screen for the first time (an install): name them if they have a profile
+  let installMsg: { title: string; body: string; url: string } | null = null;
+  if (table === "installs") {
+    const { data: pr } = await admin.from("profiles").select("name,role").eq("user_id", row.user_id).maybeSingle();
+    const n = (await admin.from("installs").select("user_id", { count: "exact", head: true })).count ?? 0;
+    installMsg = { title: "New Hurley install", body: `${pr ? `${pr.name} (${pr.role})` : "Someone"} added the app to their home screen · ${n} so far`, url: "admin.html" };
+  }
   const msg0 = table === "digests" ? { title: "Properties list ready to approve", body: "This week’s draft is waiting on the admin page", url: "admin.html" } : null;
   // Running total of people who have joined (saved a name and who they are), for the "new user" alert
   const newUsers = table === "profiles" ? ((await admin.from("profiles").select("user_id", { count: "exact", head: true })).count ?? 0) : 0;
@@ -100,7 +107,7 @@ async function adminAlert(admin: any, table: string, key: string) {
     : table === "posts" ? { title: "New message to approve", body: `${row.title} · ${who}`, url: "admin.html" }
     : table === "requests" ? { title: "New idea to approve", body: `${row.title} · ${who}`, url: "admin.html" }
     : { title: "New Hurley user", body: `${who} · ${newUsers} so far`, url: "admin.html" };
-  const msg = { ...(msg0 ?? msg1), badge };
+  const msg = { ...(installMsg ?? msg0 ?? msg1), badge };
 
   const { data: admins } = await admin.from("admins").select("user_id");
   const ids = (admins ?? []).map((a: { user_id: string }) => a.user_id);
